@@ -102,6 +102,11 @@ const (
 	BGP_ASPATH_ATTR_TYPE_CONFED_SET = 4
 )
 
+const (
+	BGP_ATTR_NHLEN_IPV6_GLOBAL        = 16
+	BGP_ATTR_NHLEN_IPV6_GLOBAL_AND_LL = 32
+)
+
 // RFC7153 5.1. Registries for the "Type" Field
 // RANGE	REGISTRATION PROCEDURES
 // 0x00-0x3F	Transitive First Come First Served
@@ -123,6 +128,7 @@ const (
 	EC_TYPE_EVPN                                  ExtendedCommunityAttrType = 0x06
 	EC_TYPE_FLOWSPEC_REDIRECT_MIRROR              ExtendedCommunityAttrType = 0x08
 	EC_TYPE_NON_TRANSITIVE_TWO_OCTET_AS_SPECIFIC  ExtendedCommunityAttrType = 0x40
+	EC_TYPE_NON_TRANSITIVE_LINK_BANDWIDTH         ExtendedCommunityAttrType = 0x40
 	EC_TYPE_NON_TRANSITIVE_IP6_SPECIFIC           ExtendedCommunityAttrType = 0x40 // RFC5701
 	EC_TYPE_NON_TRANSITIVE_IP4_SPECIFIC           ExtendedCommunityAttrType = 0x41
 	EC_TYPE_NON_TRANSITIVE_FOUR_OCTET_AS_SPECIFIC ExtendedCommunityAttrType = 0x42
@@ -9802,7 +9808,7 @@ func (p *PathAttributeMpReachNLRI) Serialize(options ...*MarshallingOption) ([]b
 	safi := p.SAFI
 	nexthoplen := 4
 	if afi == AFI_IP6 || p.Nexthop.To4() == nil {
-		nexthoplen = 16
+		nexthoplen = BGP_ATTR_NHLEN_IPV6_GLOBAL
 	}
 	offset := 0
 	switch safi {
@@ -9812,8 +9818,8 @@ func (p *PathAttributeMpReachNLRI) Serialize(options ...*MarshallingOption) ([]b
 	case SAFI_FLOW_SPEC_VPN, SAFI_FLOW_SPEC_UNICAST:
 		nexthoplen = 0
 	}
-	if p.LinkLocalNexthop != nil {
-		nexthoplen *= 2
+	if p.LinkLocalNexthop != nil && p.LinkLocalNexthop.IsLinkLocalUnicast() {
+		nexthoplen = BGP_ATTR_NHLEN_IPV6_GLOBAL_AND_LL
 	}
 	buf := make([]byte, 4+nexthoplen)
 	binary.BigEndian.PutUint16(buf[0:], afi)
@@ -9822,7 +9828,7 @@ func (p *PathAttributeMpReachNLRI) Serialize(options ...*MarshallingOption) ([]b
 	if nexthoplen != 0 {
 		if p.Nexthop.To4() == nil {
 			copy(buf[4+offset:], p.Nexthop.To16())
-			if p.LinkLocalNexthop != nil {
+			if nexthoplen == BGP_ATTR_NHLEN_IPV6_GLOBAL_AND_LL {
 				copy(buf[4+offset+16:], p.LinkLocalNexthop.To16())
 			}
 		} else {
@@ -10344,6 +10350,9 @@ func ParseExtendedCommunity(subtype ExtendedCommunityAttrSubType, com string) (E
 	ip := net.ParseIP(elems[1])
 	isTransitive := true
 	switch {
+	case subtype == EC_SUBTYPE_LINK_BANDWIDTH:
+		asn, _ := strconv.ParseUint(elems[8], 10, 16)
+		return NewLinkBandwidthExtended(uint16(asn), float32(localAdmin)), nil
 	case ip.To4() != nil:
 		return NewIPv4AddressSpecificExtended(subtype, elems[1], uint16(localAdmin), isTransitive), nil
 	case ip.To16() != nil:
@@ -10432,6 +10441,51 @@ func (e *ValidationExtended) MarshalJSON() ([]byte, error) {
 func NewValidationExtended(state ValidationState) *ValidationExtended {
 	return &ValidationExtended{
 		State: state,
+	}
+}
+
+type LinkBandwidthExtended struct {
+	AS        uint16
+	Bandwidth float32
+}
+
+func (e *LinkBandwidthExtended) GetTypes() (ExtendedCommunityAttrType, ExtendedCommunityAttrSubType) {
+	return EC_TYPE_NON_TRANSITIVE_LINK_BANDWIDTH, EC_SUBTYPE_LINK_BANDWIDTH
+}
+
+func (e *LinkBandwidthExtended) Serialize() ([]byte, error) {
+	buf := make([]byte, 8)
+	typ, subType := e.GetTypes()
+	buf[0] = byte(typ)
+	buf[1] = byte(subType)
+	binary.BigEndian.PutUint16(buf[2:4], e.AS)
+	binary.BigEndian.PutUint32(buf[4:8], math.Float32bits(e.Bandwidth))
+	return buf, nil
+}
+
+func (e *LinkBandwidthExtended) String() string {
+	return fmt.Sprintf("%d:%d", e.AS, uint32(e.Bandwidth))
+}
+
+func (e *LinkBandwidthExtended) MarshalJSON() ([]byte, error) {
+	t, s := e.GetTypes()
+	return json.Marshal(struct {
+		Type      ExtendedCommunityAttrType    `json:"type"`
+		SubType   ExtendedCommunityAttrSubType `json:"subtype"`
+		AS        uint16                       `json:"asn"`
+		Bandwidth float32                      `json:"bandwidth"`
+	}{
+		Type:      t,
+		SubType:   s,
+		AS:        e.AS,
+		Bandwidth: e.Bandwidth,
+	})
+}
+
+func NewLinkBandwidthExtended(as uint16, bw float32) *LinkBandwidthExtended {
+	return &LinkBandwidthExtended{
+		AS:        as,
+		Bandwidth: bw,
 	}
 }
 
@@ -11308,7 +11362,12 @@ func ParseExtended(data []byte) (ExtendedCommunityInterface, error) {
 	case EC_TYPE_NON_TRANSITIVE_TWO_OCTET_AS_SPECIFIC:
 		as := binary.BigEndian.Uint16(data[2:4])
 		localAdmin := binary.BigEndian.Uint32(data[4:8])
-		return NewTwoOctetAsSpecificExtended(subtype, as, localAdmin, transitive), nil
+
+		if subtype == EC_SUBTYPE_LINK_BANDWIDTH {
+			return NewLinkBandwidthExtended(as, math.Float32frombits(localAdmin)), nil
+		} else {
+			return NewTwoOctetAsSpecificExtended(subtype, as, localAdmin, transitive), nil
+		}
 	case EC_TYPE_TRANSITIVE_IP4_SPECIFIC:
 		transitive = true
 		fallthrough
@@ -13409,6 +13468,10 @@ func (e *DefaultGatewayExtended) Flat() map[string]string {
 }
 
 func (e *ValidationExtended) Flat() map[string]string {
+	return map[string]string{}
+}
+
+func (e *LinkBandwidthExtended) Flat() map[string]string {
 	return map[string]string{}
 }
 

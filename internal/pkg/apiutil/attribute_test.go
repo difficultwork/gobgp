@@ -265,7 +265,7 @@ func Test_MpReachNLRIAttribute_IPv6_UC(t *testing.T) {
 			Afi:  api.Family_AFI_IP6,
 			Safi: api.Family_SAFI_UNICAST,
 		},
-		NextHops: []string{"2001:db8::1", "2001:db8::2"},
+		NextHops: []string{"2001:db8::1", "fe80::1"},
 		Nlris:    nlris,
 	}
 
@@ -1321,6 +1321,12 @@ func Test_ExtendedCommunitiesAttribute(t *testing.T) {
 	})
 	assert.Nil(err)
 	communities = append(communities, a)
+	a, err = ptypes.MarshalAny(&api.LinkBandiwdthExtended{
+		As:        65004,
+		Bandwidth: 125000.0,
+	})
+	assert.Nil(err)
+	communities = append(communities, a)
 
 	input := &api.ExtendedCommunitiesAttribute{
 		Communities: communities,
@@ -1332,7 +1338,7 @@ func Test_ExtendedCommunitiesAttribute(t *testing.T) {
 	assert.Nil(err)
 
 	output := NewExtendedCommunitiesAttributeFromNative(n.(*bgp.PathAttributeExtendedCommunities))
-	assert.Equal(19, len(output.Communities))
+	assert.Equal(20, len(output.Communities))
 	for idx, inputCommunity := range input.Communities {
 		outputCommunity := output.Communities[idx]
 		assert.Equal(inputCommunity.TypeUrl, outputCommunity.TypeUrl)

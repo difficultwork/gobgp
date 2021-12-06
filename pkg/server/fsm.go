@@ -873,7 +873,8 @@ func (h *fsmHandler) afiSafiDisable(rf bgp.RouteFamily) string {
 }
 
 func (h *fsmHandler) handlingError(m *bgp.BGPMessage, e error, useRevisedError bool) bgp.ErrorHandling {
-	handling := bgp.ERROR_HANDLING_NONE
+	// ineffectual assignment to handling (ineffassign)
+	var handling bgp.ErrorHandling
 	if m.Header.Type == bgp.BGP_MSG_UPDATE && useRevisedError {
 		factor := e.(*bgp.MessageError)
 		handling = factor.ErrorHandling
@@ -1277,7 +1278,7 @@ func (h *fsmHandler) opensent(ctx context.Context) (bgp.FSMState, *fsmStateReaso
 					fsm.lock.RLock()
 					fsmPeerAS := fsm.pConf.Config.PeerAs
 					fsm.lock.RUnlock()
-					peerAs, err := bgp.ValidateOpenMsg(body, fsmPeerAS)
+					peerAs, err := bgp.ValidateOpenMsg(body, fsmPeerAS, fsm.peerInfo.LocalAS, net.ParseIP(fsm.gConf.Config.RouterId))
 					if err != nil {
 						m, _ := fsm.sendNotificationFromErrorMsg(err.(*bgp.MessageError))
 						return bgp.BGP_FSM_IDLE, newfsmStateReason(fsmInvalidMsg, m, nil)

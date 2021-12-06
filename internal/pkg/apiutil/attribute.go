@@ -861,7 +861,7 @@ func NewMpReachNLRIAttributeFromNative(a *bgp.PathAttributeMpReachNLRI) *api.MpR
 		nexthops = nil
 	} else {
 		nexthops = []string{a.Nexthop.String()}
-		if a.LinkLocalNexthop != nil {
+		if a.LinkLocalNexthop != nil && a.LinkLocalNexthop.IsLinkLocalUnicast() {
 			nexthops = append(nexthops, a.LinkLocalNexthop.String())
 		}
 	}
@@ -984,6 +984,11 @@ func NewExtendedCommunitiesAttributeFromNative(a *bgp.PathAttributeExtendedCommu
 			community = &api.ValidationExtended{
 				State: uint32(v.State),
 			}
+		case *bgp.LinkBandwidthExtended:
+			community = &api.LinkBandiwdthExtended{
+				As:        uint32(v.AS),
+				Bandwidth: v.Bandwidth,
+			}
 		case *bgp.ColorExtended:
 			community = &api.ColorExtended{
 				Color: v.Color,
@@ -1083,6 +1088,8 @@ func unmarshalExComm(a *api.ExtendedCommunitiesAttribute) (*bgp.PathAttributeExt
 			community = bgp.NewFourOctetAsSpecificExtended(bgp.ExtendedCommunityAttrSubType(v.SubType), v.As, uint16(v.LocalAdmin), v.IsTransitive)
 		case *api.ValidationExtended:
 			community = bgp.NewValidationExtended(bgp.ValidationState(v.State))
+		case *api.LinkBandiwdthExtended:
+			community = bgp.NewLinkBandwidthExtended(uint16(v.As), v.Bandwidth)
 		case *api.ColorExtended:
 			community = bgp.NewColorExtended(v.Color)
 		case *api.EncapExtended:
@@ -1920,7 +1927,7 @@ func UnmarshalSRSegments(s []*any.Any) ([]bgp.TunnelEncapSubTLVInterface, error)
 					Type:   bgp.EncapSubTLVType(bgp.TypeA),
 					Length: 6,
 				},
-				Label: v.Label << 12,
+				Label: v.Label,
 			}
 			if v.Flags.VFlag {
 				seg.Flags += 0x80

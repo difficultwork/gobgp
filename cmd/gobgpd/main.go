@@ -34,7 +34,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	api "github.com/osrg/gobgp/api"
 	"github.com/osrg/gobgp/internal/pkg/version"
 	"github.com/osrg/gobgp/pkg/config"
 	"github.com/osrg/gobgp/pkg/server"
@@ -42,7 +41,7 @@ import (
 
 func main() {
 	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGTERM)
+	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
 
 	var opts struct {
 		ConfigFile      string `short:"f" long:"config-file" description:"specifying a config file"`
@@ -219,7 +218,9 @@ func main() {
 }
 
 func stopServer(bgpServer *server.BgpServer, useSdNotify bool) {
-	bgpServer.StopBgp(context.Background(), &api.StopBgpRequest{})
+	log.Info("stopping gobgpd server")
+
+	bgpServer.Stop()
 	if useSdNotify {
 		daemon.SdNotify(false, daemon.SdNotifyStopping)
 	}
