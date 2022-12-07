@@ -8,10 +8,11 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/osrg/gobgp/internal/pkg/zebra"
-	"github.com/osrg/gobgp/pkg/packet/bgp"
-	"github.com/osrg/gobgp/pkg/packet/bmp"
-	"github.com/osrg/gobgp/pkg/packet/rtr"
+	"github.com/osrg/gobgp/v3/internal/pkg/version"
+	"github.com/osrg/gobgp/v3/internal/pkg/zebra"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
+	"github.com/osrg/gobgp/v3/pkg/packet/bmp"
+	"github.com/osrg/gobgp/v3/pkg/packet/rtr"
 	"github.com/spf13/viper"
 )
 
@@ -349,13 +350,12 @@ func setDefaultConfigValuesWithViper(v *viper.Viper, b *BgpConfigSet) error {
 		return err
 	}
 
-	bmpSysPrefix := "Gobgp-R"
 	for idx, server := range b.BmpServers {
 		if server.Config.SysName == "" {
-			server.Config.SysName = bmpSysPrefix + strconv.Itoa(idx)
+			server.Config.SysName = "GoBGP"
 		}
 		if server.Config.SysDescr == "" {
-			server.Config.SysDescr = "Gobgp Version: master"
+			server.Config.SysDescr = version.Version()
 		}
 		if server.Config.Port == 0 {
 			server.Config.Port = bmp.BMP_DEFAULT_PORT
@@ -419,10 +419,6 @@ func setDefaultConfigValuesWithViper(v *viper.Viper, b *BgpConfigSet) error {
 	}
 	if b.Zebra.Config.NexthopTriggerDelay == 0 {
 		b.Zebra.Config.NexthopTriggerDelay = 5
-	}
-
-	if !zebra.IsAllowableSoftwareName(b.Zebra.Config.Version, b.Zebra.Config.SoftwareName) {
-		b.Zebra.Config.SoftwareName = ""
 	}
 
 	list, err := extractArray(v.Get("neighbors"))

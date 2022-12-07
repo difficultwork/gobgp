@@ -21,9 +21,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
-	api "github.com/osrg/gobgp/api"
-	"github.com/osrg/gobgp/pkg/packet/bgp"
+	api "github.com/osrg/gobgp/v3/api"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
+	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // workaround. This for the json format compatibility. Once we update senario tests, we can remove this.
@@ -51,10 +51,9 @@ func NewDestination(dst *api.Destination) *Destination {
 	for _, p := range dst.Paths {
 		nlri, _ := GetNativeNlri(p)
 		attrs, _ := GetNativePathAttributes(p)
-		t, _ := ptypes.Timestamp(p.Age)
 		l = append(l, &Path{
 			Nlri:       nlri,
-			Age:        t.Unix(),
+			Age:        p.Age.AsTime().Unix(),
 			Best:       p.Best,
 			Attrs:      attrs,
 			Stale:      p.Stale,
@@ -66,16 +65,23 @@ func NewDestination(dst *api.Destination) *Destination {
 	return &Destination{Paths: l}
 }
 
-func NewPath(nlri bgp.AddrPrefixInterface, isWithdraw bool, attrs []bgp.PathAttributeInterface, age time.Time) *api.Path {
-	t, _ := ptypes.TimestampProto(age)
+func NewPath(nlri bgp.AddrPrefixInterface, isWithdraw bool, attrs []bgp.PathAttributeInterface, age time.Time) (*api.Path, error) {
+	n, err := MarshalNLRI(nlri)
+	if err != nil {
+		return nil, err
+	}
+	a, err := MarshalPathAttributes(attrs)
+	if err != nil {
+		return nil, err
+	}
 	return &api.Path{
-		Nlri:       MarshalNLRI(nlri),
-		Pattrs:     MarshalPathAttributes(attrs),
-		Age:        t,
+		Nlri:       n,
+		Pattrs:     a,
+		Age:        tspb.New(age),
 		IsWithdraw: isWithdraw,
 		Family:     ToApiFamily(nlri.AFI(), nlri.SAFI()),
 		Identifier: nlri.PathIdentifier(),
-	}
+	}, nil
 }
 
 func getNLRI(family bgp.RouteFamily, buf []byte) (bgp.AddrPrefixInterface, error) {

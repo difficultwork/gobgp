@@ -23,8 +23,9 @@ import (
 	"unsafe"
 
 	"github.com/k-sone/critbitgo"
-	"github.com/osrg/gobgp/pkg/packet/bgp"
-	log "github.com/sirupsen/logrus"
+
+	"github.com/osrg/gobgp/v3/pkg/log"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
 )
 
 type LookupOption uint8
@@ -53,12 +54,14 @@ type TableSelectOption struct {
 type Table struct {
 	routeFamily  bgp.RouteFamily
 	destinations map[string]*Destination
+	logger       log.Logger
 }
 
-func NewTable(rf bgp.RouteFamily, dsts ...*Destination) *Table {
+func NewTable(logger log.Logger, rf bgp.RouteFamily, dsts ...*Destination) *Table {
 	t := &Table{
 		routeFamily:  rf,
 		destinations: make(map[string]*Destination),
+		logger:       logger,
 	}
 	for _, dst := range dsts {
 		t.setDestination(dst)
@@ -82,6 +85,8 @@ func (t *Table) deletePathsByVrf(vrf *Vrf) []*Path {
 			case *bgp.LabeledVPNIPv6AddrPrefix:
 				rd = v.RD
 			case *bgp.EVPNNLRI:
+				rd = v.RD()
+			case *bgp.MUPNLRI:
 				rd = v.RD()
 			default:
 				return pathList
@@ -135,43 +140,43 @@ func (t *Table) deleteDest(dest *Destination) {
 
 func (t *Table) validatePath(path *Path) {
 	if path == nil {
-		log.WithFields(log.Fields{
-			"Topic": "Table",
-			"Key":   t.routeFamily,
-		}).Error("path is nil")
+		t.logger.Error("path is nil",
+			log.Fields{
+				"Topic": "Table",
+				"Key":   t.routeFamily})
 	}
 	if path.GetRouteFamily() != t.routeFamily {
-		log.WithFields(log.Fields{
-			"Topic":      "Table",
-			"Key":        t.routeFamily,
-			"Prefix":     path.GetNlri().String(),
-			"ReceivedRf": path.GetRouteFamily().String(),
-		}).Error("Invalid path. RouteFamily mismatch")
+		t.logger.Error("Invalid path. RouteFamily mismatch",
+			log.Fields{
+				"Topic":      "Table",
+				"Key":        t.routeFamily,
+				"Prefix":     path.GetNlri().String(),
+				"ReceivedRf": path.GetRouteFamily().String()})
 	}
 	if attr := path.getPathAttr(bgp.BGP_ATTR_TYPE_AS_PATH); attr != nil {
 		pathParam := attr.(*bgp.PathAttributeAsPath).Value
 		for _, as := range pathParam {
 			_, y := as.(*bgp.As4PathParam)
 			if !y {
-				log.WithFields(log.Fields{
-					"Topic": "Table",
-					"Key":   t.routeFamily,
-					"As":    as,
-				}).Fatal("AsPathParam must be converted to As4PathParam")
+				t.logger.Fatal("AsPathParam must be converted to As4PathParam",
+					log.Fields{
+						"Topic": "Table",
+						"Key":   t.routeFamily,
+						"As":    as})
 			}
 		}
 	}
 	if attr := path.getPathAttr(bgp.BGP_ATTR_TYPE_AS4_PATH); attr != nil {
-		log.WithFields(log.Fields{
-			"Topic": "Table",
-			"Key":   t.routeFamily,
-		}).Fatal("AS4_PATH must be converted to AS_PATH")
+		t.logger.Fatal("AS4_PATH must be converted to AS_PATH",
+			log.Fields{
+				"Topic": "Table",
+				"Key":   t.routeFamily})
 	}
 	if path.GetNlri() == nil {
-		log.WithFields(log.Fields{
-			"Topic": "Table",
-			"Key":   t.routeFamily,
-		}).Fatal("path's nlri is nil")
+		t.logger.Fatal("path's nlri is nil",
+			log.Fields{
+				"Topic": "Table",
+				"Key":   t.routeFamily})
 	}
 }
 
@@ -179,10 +184,10 @@ func (t *Table) getOrCreateDest(nlri bgp.AddrPrefixInterface, size int) *Destina
 	dest := t.GetDestination(nlri)
 	// If destination for given prefix does not exist we create it.
 	if dest == nil {
-		log.WithFields(log.Fields{
-			"Topic": "Table",
-			"Nlri":  nlri,
-		}).Debugf("create Destination")
+		t.logger.Debug("create Destination",
+			log.Fields{
+				"Topic": "Table",
+				"Nlri":  nlri})
 		dest = NewDestination(nlri, size)
 		t.setDestination(dest)
 	}
@@ -209,10 +214,11 @@ func (t *Table) GetLongerPrefixDestinations(key string) ([]*Destination, error) 
 	switch t.routeFamily {
 	case bgp.RF_IPv4_UC, bgp.RF_IPv6_UC, bgp.RF_IPv4_MPLS, bgp.RF_IPv6_MPLS:
 		_, prefix, err := net.ParseCIDR(key)
-		ones, bits := prefix.Mask.Size()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error parsing cidr %s: %v", key, err)
 		}
+		ones, bits := prefix.Mask.Size()
+
 		r := critbitgo.NewNet()
 		for _, dst := range t.GetDestinations() {
 			r.Add(nlriToIPNet(dst.nlri), dst)
@@ -270,6 +276,39 @@ func (t *Table) GetEvpnDestinationsWithRouteType(typ string) ([]*Destination, er
 		for _, dst := range destinations {
 			if nlri, ok := dst.nlri.(*bgp.EVPNNLRI); !ok {
 				return nil, fmt.Errorf("invalid evpn nlri type detected: %T", dst.nlri)
+			} else if nlri.RouteType == routeType {
+				results = append(results, dst)
+			}
+		}
+	default:
+		for _, dst := range destinations {
+			results = append(results, dst)
+		}
+	}
+	return results, nil
+}
+
+func (t *Table) GetMUPDestinationsWithRouteType(typ string) ([]*Destination, error) {
+	var routeType uint16
+	switch strings.ToLower(typ) {
+	case "isd":
+		routeType = bgp.MUP_ROUTE_TYPE_INTERWORK_SEGMENT_DISCOVERY
+	case "dsd":
+		routeType = bgp.MUP_ROUTE_TYPE_DIRECT_SEGMENT_DISCOVERY
+	case "t1st":
+		routeType = bgp.MUP_ROUTE_TYPE_TYPE_1_SESSION_TRANSFORMED
+	case "t2st":
+		routeType = bgp.MUP_ROUTE_TYPE_TYPE_2_SESSION_TRANSFORMED
+	default:
+		return nil, fmt.Errorf("unsupported mup route type: %s", typ)
+	}
+	destinations := t.GetDestinations()
+	results := make([]*Destination, 0, len(destinations))
+	switch t.routeFamily {
+	case bgp.RF_MUP_IPv4, bgp.RF_MUP_IPv6:
+		for _, dst := range destinations {
+			if nlri, ok := dst.nlri.(*bgp.MUPNLRI); !ok {
+				return nil, fmt.Errorf("invalid mup nlri type detected: %T", dst.nlri)
 			} else if nlri.RouteType == routeType {
 				results = append(results, dst)
 			}
@@ -425,6 +464,18 @@ func (t *Table) Select(option ...TableSelectOption) (*Table, error) {
 			for _, p := range prefixes {
 				// Uses LookupPrefix.Prefix as EVPN Route Type string
 				ds, err := t.GetEvpnDestinationsWithRouteType(p.Prefix)
+				if err != nil {
+					return nil, err
+				}
+				for _, dst := range ds {
+					if d := dst.Select(dOption); d != nil {
+						r.setDestination(d)
+					}
+				}
+			}
+		case bgp.RF_MUP_IPv4, bgp.RF_MUP_IPv6:
+			for _, p := range prefixes {
+				ds, err := t.GetMUPDestinationsWithRouteType(p.Prefix)
 				if err != nil {
 					return nil, err
 				}

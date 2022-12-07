@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/osrg/gobgp/pkg/server"
+	"github.com/osrg/gobgp/v3/pkg/server"
 )
 
 // ExampleUpdateConfig shows how InitialConfig can be used without UpdateConfig
@@ -29,7 +29,7 @@ func ExampleInitialConfig() {
 	}
 }
 
-// ExampleUpdateConfig shows how UpdateConfig is used in conjuction with
+// ExampleUpdateConfig shows how UpdateConfig is used in conjunction with
 // InitialConfig.
 func ExampleUpdateConfig() {
 	bgpServer := server.NewBgpServer()

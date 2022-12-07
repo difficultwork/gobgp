@@ -21,15 +21,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/osrg/gobgp/pkg/packet/bgp"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
 	"github.com/stretchr/testify/assert"
 )
 
 // before:
-//  as-path  : 65000, 4000, 400000, 300000, 40001
+//
+//	as-path  : 65000, 4000, 400000, 300000, 40001
+//
 // expected result:
-//  as-path  : 65000, 4000, 23456, 23456, 40001
-//  as4-path : 65000, 4000, 400000, 300000, 40001
+//
+//	as-path  : 65000, 4000, 23456, 23456, 40001
+//	as4-path : 65000, 4000, 400000, 300000, 40001
 func TestAsPathAs2Trans1(t *testing.T) {
 	as := []uint32{65000, 4000, 400000, 300000, 40001}
 	params := []bgp.AsPathParamInterface{bgp.NewAs4PathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as)}
@@ -54,9 +57,12 @@ func TestAsPathAs2Trans1(t *testing.T) {
 }
 
 // before:
-//  as-path  : 65000, 4000, 40000, 30000, 40001
+//
+//	as-path  : 65000, 4000, 40000, 30000, 40001
+//
 // expected result:
-//  as-path  : 65000, 4000, 40000, 30000, 40001
+//
+//	as-path  : 65000, 4000, 40000, 30000, 40001
 func TestAsPathAs2Trans2(t *testing.T) {
 	as := []uint32{65000, 4000, 40000, 30000, 40001}
 	params := []bgp.AsPathParamInterface{bgp.NewAs4PathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as)}
@@ -74,10 +80,13 @@ func TestAsPathAs2Trans2(t *testing.T) {
 }
 
 // before:
-//  as-path  : 65000, 4000, 23456, 23456, 40001
-//  as4-path : 400000, 300000, 40001
+//
+//	as-path  : 65000, 4000, 23456, 23456, 40001
+//	as4-path : 400000, 300000, 40001
+//
 // expected result:
-//  as-path  : 65000, 4000, 400000, 300000, 40001
+//
+//	as-path  : 65000, 4000, 400000, 300000, 40001
 func TestAsPathAs4Trans1(t *testing.T) {
 	as := []uint16{65000, 4000, bgp.AS_TRANS, bgp.AS_TRANS, 40001}
 	params := []bgp.AsPathParamInterface{bgp.NewAsPathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as)}
@@ -87,7 +96,7 @@ func TestAsPathAs4Trans1(t *testing.T) {
 	param4s := []*bgp.As4PathParam{bgp.NewAs4PathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as4)}
 	as4path := bgp.NewPathAttributeAs4Path(param4s)
 	msg := bgp.NewBGPUpdateMessage(nil, []bgp.PathAttributeInterface{aspath, as4path}, nil).Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(msg)
+	UpdatePathAttrs4ByteAs(logger, msg)
 	assert.Equal(t, len(msg.PathAttributes), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value[0].(*bgp.As4PathParam).AS), 5)
@@ -99,10 +108,13 @@ func TestAsPathAs4Trans1(t *testing.T) {
 }
 
 // before:
-//  as-path  : 65000, 4000, {10, 20, 30}, 23456, 23456, 40001
-//  as4-path : 400000, 300000, 40001
+//
+//	as-path  : 65000, 4000, {10, 20, 30}, 23456, 23456, 40001
+//	as4-path : 400000, 300000, 40001
+//
 // expected result:
-//  as-path  : 65000, 4000, {10, 20, 30}, 400000, 300000, 40001
+//
+//	as-path  : 65000, 4000, {10, 20, 30}, 400000, 300000, 40001
 func TestAsPathAs4Trans2(t *testing.T) {
 	as1 := []uint16{65000, 4000}
 	param1 := bgp.NewAsPathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as1)
@@ -117,7 +129,7 @@ func TestAsPathAs4Trans2(t *testing.T) {
 	param4s := []*bgp.As4PathParam{bgp.NewAs4PathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as4)}
 	as4path := bgp.NewPathAttributeAs4Path(param4s)
 	msg := bgp.NewBGPUpdateMessage(nil, []bgp.PathAttributeInterface{aspath, as4path}, nil).Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(msg)
+	UpdatePathAttrs4ByteAs(logger, msg)
 	assert.Equal(t, len(msg.PathAttributes), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value), 3)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value[0].(*bgp.As4PathParam).AS), 2)
@@ -134,10 +146,13 @@ func TestAsPathAs4Trans2(t *testing.T) {
 }
 
 // before:
-//  as-path  : 65000, 4000, {10, 20, 30}, 23456, 23456, 40001
-//  as4-path : 3000, 400000, 300000, 40001
+//
+//	as-path  : 65000, 4000, {10, 20, 30}, 23456, 23456, 40001
+//	as4-path : 3000, 400000, 300000, 40001
+//
 // expected result:
-//  as-path  : 65000, 4000, 3000, 400000, 300000, 40001
+//
+//	as-path  : 65000, 4000, 3000, 400000, 300000, 40001
 func TestAsPathAs4Trans3(t *testing.T) {
 	as1 := []uint16{65000, 4000}
 	param1 := bgp.NewAsPathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as1)
@@ -152,7 +167,7 @@ func TestAsPathAs4Trans3(t *testing.T) {
 	param4s := []*bgp.As4PathParam{bgp.NewAs4PathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as4)}
 	as4path := bgp.NewPathAttributeAs4Path(param4s)
 	msg := bgp.NewBGPUpdateMessage(nil, []bgp.PathAttributeInterface{aspath, as4path}, nil).Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(msg)
+	UpdatePathAttrs4ByteAs(logger, msg)
 	assert.Equal(t, len(msg.PathAttributes), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value[0].(*bgp.As4PathParam).AS), 6)
@@ -165,10 +180,13 @@ func TestAsPathAs4Trans3(t *testing.T) {
 }
 
 // before:
-//  as-path  : 65000, 4000, 23456, 23456, 40001
-//  as4-path : 400000, 300000, 40001, {10, 20, 30}
+//
+//	as-path  : 65000, 4000, 23456, 23456, 40001
+//	as4-path : 400000, 300000, 40001, {10, 20, 30}
+//
 // expected result:
-//  as-path  : 65000, 400000, 300000, 40001, {10, 20, 30}
+//
+//	as-path  : 65000, 400000, 300000, 40001, {10, 20, 30}
 func TestAsPathAs4Trans4(t *testing.T) {
 	as := []uint16{65000, 4000, bgp.AS_TRANS, bgp.AS_TRANS, 40001}
 	params := []bgp.AsPathParamInterface{bgp.NewAsPathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as)}
@@ -181,7 +199,7 @@ func TestAsPathAs4Trans4(t *testing.T) {
 	param4s := []*bgp.As4PathParam{as4param1, as4param2}
 	as4path := bgp.NewPathAttributeAs4Path(param4s)
 	msg := bgp.NewBGPUpdateMessage(nil, []bgp.PathAttributeInterface{aspath, as4path}, nil).Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(msg)
+	UpdatePathAttrs4ByteAs(logger, msg)
 	assert.Equal(t, len(msg.PathAttributes), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value), 2)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value[0].(*bgp.As4PathParam).AS), 4)
@@ -196,10 +214,13 @@ func TestAsPathAs4Trans4(t *testing.T) {
 }
 
 // before:
-//  as-path  : 65000, 4000, 23456, 23456, 40001
-//  as4-path : {10, 20, 30} 400000, 300000, 40001
+//
+//	as-path  : 65000, 4000, 23456, 23456, 40001
+//	as4-path : {10, 20, 30} 400000, 300000, 40001
+//
 // expected result:
-//  as-path  : 65000, {10, 20, 30}, 400000, 300000, 40001
+//
+//	as-path  : 65000, {10, 20, 30}, 400000, 300000, 40001
 func TestAsPathAs4Trans5(t *testing.T) {
 	as := []uint16{65000, 4000, bgp.AS_TRANS, bgp.AS_TRANS, 40001}
 	params := []bgp.AsPathParamInterface{bgp.NewAsPathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as)}
@@ -212,7 +233,7 @@ func TestAsPathAs4Trans5(t *testing.T) {
 	param4s := []*bgp.As4PathParam{as4param2, as4param1}
 	as4path := bgp.NewPathAttributeAs4Path(param4s)
 	msg := bgp.NewBGPUpdateMessage(nil, []bgp.PathAttributeInterface{aspath, as4path}, nil).Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(msg)
+	UpdatePathAttrs4ByteAs(logger, msg)
 	assert.Equal(t, len(msg.PathAttributes), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value), 3)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value[0].(*bgp.As4PathParam).AS), 1)
@@ -228,10 +249,13 @@ func TestAsPathAs4Trans5(t *testing.T) {
 }
 
 // before:
-//  as-path  : 65000, 4000, 23456, 23456, 40001
-//  as4-path : 100000, 65000, 4000, 400000, 300000, 40001
+//
+//	as-path  : 65000, 4000, 23456, 23456, 40001
+//	as4-path : 100000, 65000, 4000, 400000, 300000, 40001
+//
 // expected result:
-//  as-path  : 65000, 4000, 23456, 23456, 40001
+//
+//	as-path  : 65000, 4000, 23456, 23456, 40001
 func TestAsPathAs4TransInvalid1(t *testing.T) {
 	as := []uint16{65000, 4000, bgp.AS_TRANS, bgp.AS_TRANS, 40001}
 	params := []bgp.AsPathParamInterface{bgp.NewAsPathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as)}
@@ -242,7 +266,7 @@ func TestAsPathAs4TransInvalid1(t *testing.T) {
 	param4s := []*bgp.As4PathParam{as4param1}
 	as4path := bgp.NewPathAttributeAs4Path(param4s)
 	msg := bgp.NewBGPUpdateMessage(nil, []bgp.PathAttributeInterface{aspath, as4path}, nil).Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(msg)
+	UpdatePathAttrs4ByteAs(logger, msg)
 	assert.Equal(t, len(msg.PathAttributes), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value[0].(*bgp.As4PathParam).AS), 5)
@@ -254,10 +278,13 @@ func TestAsPathAs4TransInvalid1(t *testing.T) {
 }
 
 // before:
-//  as-path  : 65000, 4000, 23456, 23456, 40001
-//  as4-path : 300000, 40001
+//
+//	as-path  : 65000, 4000, 23456, 23456, 40001
+//	as4-path : 300000, 40001
+//
 // expected result:
-//  as-path  : 65000, 4000, 23456, 300000, 40001
+//
+//	as-path  : 65000, 4000, 23456, 300000, 40001
 func TestAsPathAs4TransInvalid2(t *testing.T) {
 	as := []uint16{65000, 4000, bgp.AS_TRANS, bgp.AS_TRANS, 40001}
 	params := []bgp.AsPathParamInterface{bgp.NewAsPathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as)}
@@ -268,7 +295,7 @@ func TestAsPathAs4TransInvalid2(t *testing.T) {
 	param4s := []*bgp.As4PathParam{as4param1}
 	as4path := bgp.NewPathAttributeAs4Path(param4s)
 	msg := bgp.NewBGPUpdateMessage(nil, []bgp.PathAttributeInterface{aspath, as4path}, nil).Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(msg)
+	UpdatePathAttrs4ByteAs(logger, msg)
 	assert.Equal(t, len(msg.PathAttributes), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value[0].(*bgp.As4PathParam).AS), 5)
@@ -280,17 +307,20 @@ func TestAsPathAs4TransInvalid2(t *testing.T) {
 }
 
 // before:
-//  as-path  : 65000, 4000, 23456, 23456, 40001
-//  as4-path : nil
+//
+//	as-path  : 65000, 4000, 23456, 23456, 40001
+//	as4-path : nil
+//
 // expected result:
-//  as-path  : 65000, 4000, 23456, 23456, 40001
+//
+//	as-path  : 65000, 4000, 23456, 23456, 40001
 func TestAsPathAs4TransInvalid3(t *testing.T) {
 	as := []uint16{65000, 4000, bgp.AS_TRANS, bgp.AS_TRANS, 40001}
 	params := []bgp.AsPathParamInterface{bgp.NewAsPathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as)}
 	aspath := bgp.NewPathAttributeAsPath(params)
 
 	msg := bgp.NewBGPUpdateMessage(nil, []bgp.PathAttributeInterface{aspath}, nil).Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(msg)
+	UpdatePathAttrs4ByteAs(logger, msg)
 	assert.Equal(t, len(msg.PathAttributes), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value[0].(*bgp.As4PathParam).AS), 5)
@@ -302,10 +332,13 @@ func TestAsPathAs4TransInvalid3(t *testing.T) {
 }
 
 // before:
-//  as-path  : 65000, 4000, 23456, 23456, 40001
-//  as4-path : empty
+//
+//	as-path  : 65000, 4000, 23456, 23456, 40001
+//	as4-path : empty
+//
 // expected result:
-//  as-path  : 65000, 4000, 23456, 23456, 40001
+//
+//	as-path  : 65000, 4000, 23456, 23456, 40001
 func TestAsPathAs4TransInvalid4(t *testing.T) {
 	as := []uint16{65000, 4000, bgp.AS_TRANS, bgp.AS_TRANS, 40001}
 	params := []bgp.AsPathParamInterface{bgp.NewAsPathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, as)}
@@ -316,7 +349,7 @@ func TestAsPathAs4TransInvalid4(t *testing.T) {
 	param4s := []*bgp.As4PathParam{as4param1}
 	as4path := bgp.NewPathAttributeAs4Path(param4s)
 	msg := bgp.NewBGPUpdateMessage(nil, []bgp.PathAttributeInterface{aspath, as4path}, nil).Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(msg)
+	UpdatePathAttrs4ByteAs(logger, msg)
 	assert.Equal(t, len(msg.PathAttributes), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value), 1)
 	assert.Equal(t, len(msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value[0].(*bgp.As4PathParam).AS), 5)
@@ -340,7 +373,7 @@ func TestASPathAs4TransMultipleParams(t *testing.T) {
 	param4s := []*bgp.As4PathParam{as4param1, as4param2}
 	as4path := bgp.NewPathAttributeAs4Path(param4s)
 	msg := bgp.NewBGPUpdateMessage(nil, []bgp.PathAttributeInterface{aspath, as4path}, nil).Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(msg)
+	UpdatePathAttrs4ByteAs(logger, msg)
 	for _, param := range msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value {
 		p := param.(*bgp.As4PathParam)
 		assert.Equal(t, p.Num, uint8(len(p.AS)))
@@ -364,7 +397,7 @@ func TestASPathAs4TransMultipleLargeParams(t *testing.T) {
 	param4s := []*bgp.As4PathParam{as4param1, as4param2}
 	as4path := bgp.NewPathAttributeAs4Path(param4s)
 	msg := bgp.NewBGPUpdateMessage(nil, []bgp.PathAttributeInterface{aspath, as4path}, nil).Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(msg)
+	UpdatePathAttrs4ByteAs(logger, msg)
 	for _, param := range msg.PathAttributes[0].(*bgp.PathAttributeAsPath).Value {
 		p := param.(*bgp.As4PathParam)
 		assert.Equal(t, p.Num, uint8(len(p.AS)))

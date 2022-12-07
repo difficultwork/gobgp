@@ -24,11 +24,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	api "github.com/osrg/gobgp/api"
-	"github.com/osrg/gobgp/internal/pkg/apiutil"
-	"github.com/osrg/gobgp/pkg/packet/bgp"
+	tspb "google.golang.org/protobuf/types/known/timestamppb"
+
+	api "github.com/osrg/gobgp/v3/api"
+	"github.com/osrg/gobgp/v3/pkg/apiutil"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
 )
 
 // Returns config file type by retrieving extension from the given path.
@@ -401,8 +401,8 @@ func newUseMultiplePathsFromConfigStruct(c *UseMultiplePaths) *api.UseMultiplePa
 		},
 		Ebgp: &api.Ebgp{
 			Config: &api.EbgpConfig{
-				AllowMultipleAs: c.Ebgp.Config.AllowMultipleAs,
-				MaximumPaths:    c.Ebgp.Config.MaximumPaths,
+				AllowMultipleAsn: c.Ebgp.Config.AllowMultipleAs,
+				MaximumPaths:     c.Ebgp.Config.MaximumPaths,
 			},
 		},
 		Ibgp: &api.Ibgp{
@@ -427,12 +427,11 @@ func newAfiSafiFromConfigStruct(c *AfiSafi) *api.AfiSafi {
 	}
 }
 
-func ProtoTimestamp(secs int64) *timestamp.Timestamp {
+func ProtoTimestamp(secs int64) *tspb.Timestamp {
 	if secs == 0 {
 		return nil
 	}
-	t, _ := ptypes.TimestampProto(time.Unix(secs, 0))
-	return t
+	return tspb.New(time.Unix(secs, 0))
 }
 
 func NewPeerFromConfigStruct(pconf *Neighbor) *api.Peer {
@@ -457,29 +456,29 @@ func NewPeerFromConfigStruct(pconf *Neighbor) *api.Peer {
 	if err != nil {
 		return nil
 	}
-	var removePrivateAs api.PeerConf_RemovePrivateAs
+	var removePrivate api.RemovePrivate
 	switch pconf.Config.RemovePrivateAs {
 	case REMOVE_PRIVATE_AS_OPTION_ALL:
-		removePrivateAs = api.PeerConf_ALL
+		removePrivate = api.RemovePrivate_REMOVE_ALL
 	case REMOVE_PRIVATE_AS_OPTION_REPLACE:
-		removePrivateAs = api.PeerConf_REPLACE
+		removePrivate = api.RemovePrivate_REPLACE
 	}
 	return &api.Peer{
 		ApplyPolicy: newApplyPolicyFromConfigStruct(&pconf.ApplyPolicy),
 		Conf: &api.PeerConf{
 			NeighborAddress:   pconf.Config.NeighborAddress,
-			PeerAs:            pconf.Config.PeerAs,
-			LocalAs:           pconf.Config.LocalAs,
-			PeerType:          uint32(pconf.Config.PeerType.ToInt()),
+			PeerAsn:           pconf.Config.PeerAs,
+			LocalAsn:          pconf.Config.LocalAs,
+			Type:              api.PeerType(pconf.Config.PeerType.ToInt()),
 			AuthPassword:      pconf.Config.AuthPassword,
 			RouteFlapDamping:  pconf.Config.RouteFlapDamping,
 			Description:       pconf.Config.Description,
 			PeerGroup:         pconf.Config.PeerGroup,
 			NeighborInterface: pconf.Config.NeighborInterface,
 			Vrf:               pconf.Config.Vrf,
-			AllowOwnAs:        uint32(pconf.AsPathOptions.Config.AllowOwnAs),
-			RemovePrivateAs:   removePrivateAs,
-			ReplacePeerAs:     pconf.AsPathOptions.Config.ReplacePeerAs,
+			AllowOwnAsn:       uint32(pconf.AsPathOptions.Config.AllowOwnAs),
+			RemovePrivate:     removePrivate,
+			ReplacePeerAsn:    pconf.AsPathOptions.Config.ReplacePeerAs,
 			AdminDown:         pconf.Config.AdminDown,
 		},
 		State: &api.PeerState{
@@ -507,8 +506,8 @@ func NewPeerFromConfigStruct(pconf *Neighbor) *api.Peer {
 					Total:        s.Messages.Sent.Total,
 				},
 			},
-			PeerAs:          s.PeerAs,
-			PeerType:        uint32(s.PeerType.ToInt()),
+			PeerAsn:         s.PeerAs,
+			Type:            api.PeerType(s.PeerType.ToInt()),
 			NeighborAddress: pconf.State.NeighborAddress,
 			Queues:          &api.Queues{},
 			RemoteCap:       remoteCap,
@@ -556,6 +555,7 @@ func NewPeerFromConfigStruct(pconf *Neighbor) *api.Peer {
 		},
 		Transport: &api.Transport{
 			RemotePort:    uint32(pconf.Transport.Config.RemotePort),
+			LocalPort:     uint32(pconf.Transport.Config.LocalPort),
 			LocalAddress:  localAddress,
 			PassiveMode:   pconf.Transport.Config.PassiveMode,
 			BindInterface: pconf.Transport.Config.BindInterface,
@@ -579,17 +579,17 @@ func NewPeerGroupFromConfigStruct(pconf *PeerGroup) *api.PeerGroup {
 	return &api.PeerGroup{
 		ApplyPolicy: newApplyPolicyFromConfigStruct(&pconf.ApplyPolicy),
 		Conf: &api.PeerGroupConf{
-			PeerAs:           pconf.Config.PeerAs,
-			LocalAs:          pconf.Config.LocalAs,
-			PeerType:         uint32(pconf.Config.PeerType.ToInt()),
+			PeerAsn:          pconf.Config.PeerAs,
+			LocalAsn:         pconf.Config.LocalAs,
+			Type:             api.PeerType(pconf.Config.PeerType.ToInt()),
 			AuthPassword:     pconf.Config.AuthPassword,
 			RouteFlapDamping: pconf.Config.RouteFlapDamping,
 			Description:      pconf.Config.Description,
 			PeerGroupName:    pconf.Config.PeerGroupName,
 		},
 		Info: &api.PeerGroupState{
-			PeerAs:        s.PeerAs,
-			PeerType:      uint32(s.PeerType.ToInt()),
+			PeerAsn:       s.PeerAs,
+			Type:          api.PeerType(s.PeerType.ToInt()),
 			TotalPaths:    s.TotalPaths,
 			TotalPrefixes: s.TotalPrefixes,
 		},
@@ -650,7 +650,7 @@ func NewGlobalFromConfigStruct(c *Global) *api.Global {
 	applyPolicy := newApplyPolicyFromConfigStruct(&c.ApplyPolicy)
 
 	return &api.Global{
-		As:               c.Config.As,
+		Asn:              c.Config.As,
 		RouterId:         c.Config.RouterId,
 		ListenPort:       c.Config.Port,
 		ListenAddresses:  c.Config.LocalAddressList,

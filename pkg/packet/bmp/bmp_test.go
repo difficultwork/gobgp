@@ -18,7 +18,7 @@ package bmp
 import (
 	"testing"
 
-	"github.com/osrg/gobgp/pkg/packet/bgp"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -71,6 +71,43 @@ func Test_RouteMonitoring(t *testing.T) {
 	verify(t, NewBMPRouteMonitoring(*p0, m))
 }
 
+func Test_RouteMonitoringAdjRIBOut(t *testing.T) {
+	m := bgp.NewTestBGPUpdateMessage()
+	p0 := NewBMPPeerHeader(0, 16, 1000, "10.0.0.1", 12345, "10.0.0.2", 1)
+	assert.True(t, p0.IsAdjRIBOut())
+	verify(t, NewBMPRouteMonitoring(*p0, m))
+}
+
+func Test_RouteMonitoringAddPath(t *testing.T) {
+	opt := &bgp.MarshallingOption{
+		AddPath: map[bgp.RouteFamily]bgp.BGPAddPathMode{bgp.RF_IPv4_UC: bgp.BGP_ADD_PATH_BOTH},
+	}
+	p1 := bgp.NewIPAddrPrefix(24, "10.10.10.0")
+	p1.SetPathLocalIdentifier(10)
+	p := []bgp.PathAttributeInterface{
+		bgp.NewPathAttributeOrigin(3),
+		bgp.NewPathAttributeNextHop("129.1.1.2"),
+	}
+	m := bgp.NewBGPUpdateMessage([]*bgp.IPAddrPrefix{}, p, []*bgp.IPAddrPrefix{p1})
+	p0 := NewBMPPeerHeader(0, 0, 1000, "fe80::6e40:8ff:feab:2c2a", 70000, "10.0.0.2", 1)
+
+	m1 := NewBMPRouteMonitoring(*p0, m)
+	buf1, _ := m1.Serialize(opt)
+	m2, err := ParseBMPMessageWithOptions(buf1, func(BMPPeerHeader) []*bgp.MarshallingOption {
+		return []*bgp.MarshallingOption{opt}
+	})
+	require.NoError(t, err)
+
+	// We need to fix tha path identifier (local/remote)
+	u2 := m2.Body.(*BMPRouteMonitoring).BGPUpdate.Body.(*bgp.BGPUpdate).NLRI[0]
+	assert.Equal(t, u2.PathIdentifier(), uint32(10))
+	assert.Equal(t, u2.PathLocalIdentifier(), uint32(0))
+	u2.SetPathIdentifier(0)
+	u2.SetPathLocalIdentifier(10)
+
+	assert.Equal(t, m1, m2)
+}
+
 func Test_StatisticsReport(t *testing.T) {
 	p0 := NewBMPPeerHeader(0, 0, 1000, "10.0.0.1", 70000, "10.0.0.2", 1)
 	s0 := NewBMPStatisticsReport(
@@ -79,6 +116,18 @@ func Test_StatisticsReport(t *testing.T) {
 			NewBMPStatsTLV32(BMP_STAT_TYPE_REJECTED, 100),
 			NewBMPStatsTLV64(BMP_STAT_TYPE_ADJ_RIB_IN, 200),
 			NewBMPStatsTLVPerAfiSafi64(BMP_STAT_TYPE_PER_AFI_SAFI_LOC_RIB, bgp.AFI_IP, bgp.SAFI_UNICAST, 300),
+		},
+	)
+	verify(t, s0)
+}
+
+func Test_StatisticsReportAdjRIBOut(t *testing.T) {
+	p0 := NewBMPPeerHeader(0, 8, 1000, "10.0.0.1", 12345, "10.0.0.2", 1)
+	s0 := NewBMPStatisticsReport(
+		*p0,
+		[]BMPStatsTLVInterface{
+			NewBMPStatsTLV64(BMP_STAT_TYPE_ADJ_RIB_OUT_POST_POLICY, 200),
+			NewBMPStatsTLVPerAfiSafi64(BMP_STAT_TYPE_PER_AFI_SAFI_ADJ_RIB_OUT_POST_POLICY, bgp.AFI_IP, bgp.SAFI_UNICAST, 300),
 		},
 	)
 	verify(t, s0)

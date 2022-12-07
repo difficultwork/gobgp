@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/osrg/gobgp/internal/pkg/config"
-	"github.com/osrg/gobgp/pkg/packet/bgp"
+	"github.com/osrg/gobgp/v3/internal/pkg/config"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -88,7 +88,7 @@ func TestASPathLen(t *testing.T) {
 	nlri := []*bgp.IPAddrPrefix{bgp.NewIPAddrPrefix(24, "10.10.10.0")}
 	bgpmsg := bgp.NewBGPUpdateMessage(nil, pathAttributes, nlri)
 	update := bgpmsg.Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(update)
+	UpdatePathAttrs4ByteAs(logger, update)
 	peer := PathCreatePeer()
 	p := NewPath(peer[0], update.NLRI[0], false, update.PathAttributes, time.Now(), false)
 	assert.Equal(10, p.GetAsPathLen())
@@ -114,7 +114,7 @@ func TestPathPrependAsnToExistingSeqAttr(t *testing.T) {
 	nlri := []*bgp.IPAddrPrefix{bgp.NewIPAddrPrefix(24, "10.10.10.0")}
 	bgpmsg := bgp.NewBGPUpdateMessage(nil, pathAttributes, nlri)
 	update := bgpmsg.Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(update)
+	UpdatePathAttrs4ByteAs(logger, update)
 	peer := PathCreatePeer()
 	p := NewPath(peer[0], update.NLRI[0], false, update.PathAttributes, time.Now(), false)
 
@@ -135,7 +135,7 @@ func TestPathPrependAsnToNewAsPathAttr(t *testing.T) {
 	nlri := []*bgp.IPAddrPrefix{bgp.NewIPAddrPrefix(24, "10.10.10.0")}
 	bgpmsg := bgp.NewBGPUpdateMessage(nil, pathAttributes, nlri)
 	update := bgpmsg.Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(update)
+	UpdatePathAttrs4ByteAs(logger, update)
 	peer := PathCreatePeer()
 	p := NewPath(peer[0], update.NLRI[0], false, update.PathAttributes, time.Now(), false)
 
@@ -163,7 +163,7 @@ func TestPathPrependAsnToNewAsPathSeq(t *testing.T) {
 	nlri := []*bgp.IPAddrPrefix{bgp.NewIPAddrPrefix(24, "10.10.10.0")}
 	bgpmsg := bgp.NewBGPUpdateMessage(nil, pathAttributes, nlri)
 	update := bgpmsg.Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(update)
+	UpdatePathAttrs4ByteAs(logger, update)
 	peer := PathCreatePeer()
 	p := NewPath(peer[0], update.NLRI[0], false, update.PathAttributes, time.Now(), false)
 
@@ -192,7 +192,7 @@ func TestPathPrependAsnToEmptyAsPathAttr(t *testing.T) {
 	nlri := []*bgp.IPAddrPrefix{bgp.NewIPAddrPrefix(24, "10.10.10.0")}
 	bgpmsg := bgp.NewBGPUpdateMessage(nil, pathAttributes, nlri)
 	update := bgpmsg.Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(update)
+	UpdatePathAttrs4ByteAs(logger, update)
 	peer := PathCreatePeer()
 	p := NewPath(peer[0], update.NLRI[0], false, update.PathAttributes, time.Now(), false)
 
@@ -227,7 +227,7 @@ func TestPathPrependAsnToFullPathAttr(t *testing.T) {
 	nlri := []*bgp.IPAddrPrefix{bgp.NewIPAddrPrefix(24, "10.10.10.0")}
 	bgpmsg := bgp.NewBGPUpdateMessage(nil, pathAttributes, nlri)
 	update := bgpmsg.Body.(*bgp.BGPUpdate)
-	UpdatePathAttrs4ByteAs(update)
+	UpdatePathAttrs4ByteAs(logger, update)
 	peer := PathCreatePeer()
 	p := NewPath(peer[0], update.NLRI[0], false, update.PathAttributes, time.Now(), false)
 
@@ -382,4 +382,13 @@ func TestNLRIToIPNet(t *testing.T) {
 	_, n4, _ := net.ParseCIDR("2806:106e:19::/48")
 	ipNet = nlriToIPNet(bgp.NewLabeledIPv6AddrPrefix(48, "2806:106e:19::", *labels))
 	assert.Equal(t, n4, ipNet)
+
+	rd, _ := bgp.ParseRouteDistinguisher("100:100")
+	_, n5, _ := net.ParseCIDR("40.40.40.0/24")
+	ipNet = nlriToIPNet(bgp.NewLabeledVPNIPAddrPrefix(24, "40.40.40.0", *labels, rd))
+	assert.Equal(t, n5, ipNet)
+
+	_, n6, _ := net.ParseCIDR("2001:db8:53::/64")
+	ipNet = nlriToIPNet(bgp.NewLabeledVPNIPv6AddrPrefix(64, "2001:db8:53::", *labels, rd))
+	assert.Equal(t, n6, ipNet)
 }

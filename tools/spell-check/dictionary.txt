@@ -44,6 +44,8 @@ srlg
 subcode
 syscall
 syslog
+teid
 unicast
 uptime
+vpls
 zapi

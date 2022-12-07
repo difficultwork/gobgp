@@ -23,7 +23,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/osrg/gobgp/pkg/packet/bgp"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
 )
 
 func mapkey(index int, name string) string {
@@ -264,6 +264,8 @@ const (
 	AFI_SAFI_TYPE_IPV6_SRPOLICY         AfiSafiType = "ipv6-srpolicy"
 	AFI_SAFI_TYPE_OPAQUE                AfiSafiType = "opaque"
 	AFI_SAFI_TYPE_LS                    AfiSafiType = "ls"
+	AFI_SAFI_TYPE_IPV4_MUP              AfiSafiType = "ipv4-mup"
+	AFI_SAFI_TYPE_IPV6_MUP              AfiSafiType = "ipv6-mup"
 )
 
 var AfiSafiTypeToIntMap = map[AfiSafiType]int{
@@ -291,6 +293,8 @@ var AfiSafiTypeToIntMap = map[AfiSafiType]int{
 	AFI_SAFI_TYPE_IPV6_SRPOLICY:         21,
 	AFI_SAFI_TYPE_OPAQUE:                22,
 	AFI_SAFI_TYPE_LS:                    23,
+	AFI_SAFI_TYPE_IPV4_MUP:              24,
+	AFI_SAFI_TYPE_IPV6_MUP:              25,
 }
 
 var IntToAfiSafiTypeMap = map[int]AfiSafiType{
@@ -318,6 +322,8 @@ var IntToAfiSafiTypeMap = map[int]AfiSafiType{
 	21: AFI_SAFI_TYPE_IPV6_SRPOLICY,
 	22: AFI_SAFI_TYPE_OPAQUE,
 	23: AFI_SAFI_TYPE_LS,
+	24: AFI_SAFI_TYPE_IPV4_MUP,
+	25: AFI_SAFI_TYPE_IPV6_MUP,
 }
 
 func (v AfiSafiType) Validate() error {
@@ -1141,7 +1147,7 @@ type ZebraState struct {
 	MplsLabelRangeSize uint32 `mapstructure:"mpls-label-range-size" json:"mpls-label-range-size,omitempty"`
 	// original -> gobgp:software-name
 	// Configure zebra software name.
-	// frr4, cumulus, frr6, frr7, frr7.2, and frr7.3 can be used.
+	// frr4, cumulus, frr6, frr7, frr7.2 and frr7.3 can be used.
 	SoftwareName string `mapstructure:"software-name" json:"software-name,omitempty"`
 }
 
@@ -1171,7 +1177,7 @@ type ZebraConfig struct {
 	MplsLabelRangeSize uint32 `mapstructure:"mpls-label-range-size" json:"mpls-label-range-size,omitempty"`
 	// original -> gobgp:software-name
 	// Configure zebra software name.
-	// frr4, cumulus, frr6, frr7, frr7.2, and frr7.3 can be used.
+	// frr4, cumulus, frr6, frr7, frr7.2 and frr7.3 can be used.
 	SoftwareName string `mapstructure:"software-name" json:"software-name,omitempty"`
 }
 
@@ -2580,6 +2586,10 @@ type TransportConfig struct {
 	// may be expressed as either an IP address or reference
 	// to the name of an interface.
 	LocalAddress string `mapstructure:"local-address" json:"local-address,omitempty"`
+	// original -> gobgp:local-port
+	// gobgp:local-port's original type is inet:port-number.
+	// Set the local port (if available) to use for the session.
+	LocalPort uint16 `mapstructure:"local-port" json:"local-port,omitempty"`
 	// original -> gobgp:remote-port
 	// gobgp:remote-port's original type is inet:port-number.
 	RemotePort uint16 `mapstructure:"remote-port" json:"remote-port,omitempty"`
@@ -2605,6 +2615,9 @@ func (lhs *TransportConfig) Equal(rhs *TransportConfig) bool {
 		return false
 	}
 	if lhs.LocalAddress != rhs.LocalAddress {
+		return false
+	}
+	if lhs.LocalPort != rhs.LocalPort {
 		return false
 	}
 	if lhs.RemotePort != rhs.RemotePort {
@@ -4116,6 +4129,7 @@ type AfiSafi struct {
 	// original -> gobgp:add-paths
 	// add-paths configuration options related to a particular AFI-SAFI.
 	AddPaths AddPaths `mapstructure:"add-paths" json:"add-paths,omitempty"`
+	// original -> bgp-mp:ipv4-mup
 }
 
 func (lhs *AfiSafi) Equal(rhs *AfiSafi) bool {
