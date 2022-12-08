@@ -22,9 +22,9 @@
 syntax = "proto3";
 
 package apipb;
-option go_package = "github.com/osrg/gobgp/v3/api;apipb";
+option go_package = "github.com/Netopian/slimbgp/api;apipb";
 
-import "gobgp.proto";
+import "sbgp.proto";
 
 message MultiProtocolCapability {
     apipb.Family family = 1;
