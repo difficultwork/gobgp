@@ -21,13 +21,13 @@
 
 syntax = "proto3";
 
-package apipb;
-option go_package = "github.com/Netopian/slimbgp/api;apipb";
+package sbgpapi;
+option go_package = "github.com/Netopian/slimbgp/api;sbgpapi";
 
 import "sbgp.proto";
 
 message MultiProtocolCapability {
-    apipb.Family family = 1;
+    sbgpapi.Family family = 1;
 }
 
 message RouteRefreshCapability {
@@ -37,11 +37,11 @@ message CarryingLabelInfoCapability {
 }
 
 message ExtendedNexthopCapabilityTuple {
-    apipb.Family nlri_family = 1;
+    sbgpapi.Family nlri_family = 1;
     // Nexthop AFI must be either
-    // gobgp.IPv4 or
-    // gobgp.IPv6.
-    apipb.Family nexthop_family = 2;
+    // sbgp.IPv4 or
+    // sbgp.IPv6.
+    sbgpapi.Family nexthop_family = 2;
 }
 
 message ExtendedNexthopCapability {
@@ -49,7 +49,7 @@ message ExtendedNexthopCapability {
 }
 
 message GracefulRestartCapabilityTuple {
-    apipb.Family family = 1;
+    sbgpapi.Family family = 1;
     uint32 flags = 2;
 }
 
@@ -64,7 +64,7 @@ message FourOctetASNCapability {
 }
 
 message AddPathCapabilityTuple {
-    apipb.Family family = 1;
+    sbgpapi.Family family = 1;
     enum Mode {
         NONE = 0;
         RECEIVE = 1;
@@ -82,7 +82,7 @@ message EnhancedRouteRefreshCapability {
 }
 
 message LongLivedGracefulRestartCapabilityTuple {
-    apipb.Family family = 1;
+    sbgpapi.Family family = 1;
     uint32 flags = 2;
     uint32 time = 3;
 }
@@ -97,6 +97,12 @@ message RouteRefreshCiscoCapability {
 message FqdnCapability {
     string host_name = 1;
     string domain_name = 2;
+}
+
+//XRDP
+message RDPCapability {
+    sbgpapi.Family family = 1;
+    uint32 flags = 2;
 }
 
 message UnknownCapability {

@@ -15,7 +15,7 @@
 //go:build linux
 // +build linux
 
-package server
+package netty
 
 import (
 	"net"
@@ -101,7 +101,7 @@ func setTCPMinTTLSockopt(conn *net.TCPConn, ttl int) error {
 	return setsockOptInt(sc, level, name, ttl)
 }
 
-func dialerControl(logger log.Logger, network, address string, c syscall.RawConn, ttl, minTtl uint8, password string, bindInterface string) error {
+func DialerControl(logger log.Logger, network, address string, c syscall.RawConn, ttl, minTtl uint8, password string, bindInterface string) error {
 	family := syscall.AF_INET
 	raddr, _ := net.ResolveTCPAddr("tcp", address)
 	if raddr.IP.To4() == nil {

@@ -21,8 +21,8 @@
 
 syntax = "proto3";
 
-package apipb;
-option go_package = "github.com/Netopian/slimbgp/api;apipb";
+package sbgpapi;
+option go_package = "github.com/Netopian/slimbgp/api;sbgpapi";
 
 import "google/protobuf/any.proto";
 import "sbgp.proto";
@@ -298,9 +298,9 @@ message LsLinkDescriptor {
   uint32 link_local_id = 1;
   uint32 link_remote_id = 2;
   string interface_addr_ipv4 = 3;
-  string neighbor_addr_ipv4 = 4;
+  string peer_addr_ipv4 = 4;
   string interface_addr_ipv6 = 5;
-  string neighbor_addr_ipv6 = 6;
+  string peer_addr_ipv6 = 6;
 }
 
 enum LsOspfRouteType {
@@ -366,51 +366,8 @@ message LsAddrPrefix {
   uint64 identifier = 5;
 }
 
-message MUPInterworkSegmentDiscoveryRoute {
-  // One of:
-  // - RouteDistinguisherTwoOctetASN
-  // - RouteDistinguisherIPAddress
-  // - RouteDistinguisherFourOctetASN
-  google.protobuf.Any rd = 1;
-  string prefix = 2;
-}
-
-message MUPDirectSegmentDiscoveryRoute {
-  // One of:
-  // - RouteDistinguisherTwoOctetASN
-  // - RouteDistinguisherIPAddress
-  // - RouteDistinguisherFourOctetASN
-  google.protobuf.Any rd = 1;
-  string address = 2;
-}
-
-message MUPType1SessionTransformedRoute {
-  // One of:
-  // - RouteDistinguisherTwoOctetASN
-  // - RouteDistinguisherIPAddress
-  // - RouteDistinguisherFourOctetASN
-  google.protobuf.Any rd = 1;
-  uint32 prefix_length = 2 [deprecated = true];
-  string prefix = 3;
-  uint32 teid = 4;
-  uint32 qfi = 5;
-  uint32 endpoint_address_length = 6;
-  string endpoint_address = 7;
-}
-
-message MUPType2SessionTransformedRoute {
-  // One of:
-  // - RouteDistinguisherTwoOctetASN
-  // - RouteDistinguisherIPAddress
-  // - RouteDistinguisherFourOctetASN
-  google.protobuf.Any rd = 1;
-  uint32 endpoint_address_length = 2;
-  string endpoint_address = 3;
-  uint32 teid = 4;
-}
-
 message MpReachNLRIAttribute {
-  apipb.Family family = 1;
+  sbgpapi.Family family = 1;
   repeated string next_hops = 2;
   // Each NLRI must be one of:
   // - IPAddressPrefix
@@ -429,15 +386,11 @@ message MpReachNLRIAttribute {
   // - OpaqueNLRI
   // - LsAddrPrefix
   // - SR Policy NLRI
-  // - MUPInterworkSegmentDiscoveryRoute
-  // - MUPDirectSegmentDiscoveryRoute
-  // - MUPType1SessionTransformedRoute
-  // - MUPType2SessionTransformedRoute
   repeated google.protobuf.Any nlris = 3;
 }
 
 message MpUnreachNLRIAttribute {
-  apipb.Family family = 1;
+  sbgpapi.Family family = 1;
   // The same as NLRI field of MpReachNLRIAttribute
   repeated google.protobuf.Any nlris = 3;
 }
@@ -503,6 +456,12 @@ message TrafficRateExtended {
 message TrafficActionExtended {
   bool terminal = 1;
   bool sample = 2;
+  bool rdp = 3; // XRDP
+}
+
+// XRDP
+message RedirectIPExtended {
+  string ip = 1; 
 }
 
 message RedirectTwoOctetAsSpecificExtended {
@@ -521,12 +480,6 @@ message RedirectFourOctetAsSpecificExtended {
 }
 
 message TrafficRemarkExtended { uint32 dscp = 1; }
-
-message MUPExtended {
-  uint32 sub_type = 1;
-  uint32 segment_id2 = 2;
-  uint32 segment_id4 = 3;
-}
 
 message UnknownExtended {
   uint32 type = 1;
@@ -548,7 +501,6 @@ message ExtendedCommunitiesAttribute {
   // - RedirectIPv4AddressSpecificExtended
   // - RedirectFourOctetAsSpecificExtended
   // - TrafficRemarkExtended
-  // - MUPExtended
   // - UnknownExtended
   repeated google.protobuf.Any communities = 1;
 }

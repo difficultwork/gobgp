@@ -1,0 +1,43 @@
+syntax = "proto3"
+
+import "google/protobuf/any.proto"
+
+package pump
+
+option java_package = "org.netopian.protocol.common.sealing"
+option java_outer_classname = "Typeless"
+option go_package = "pump"
+
+enum CharsetType {
+    UtF_8 = 0;
+}
+
+message RecordAny {
+    uint64      version  = 1;
+    uint64      sequence = 2;
+    CharsetType charset   = 3;
+    repeated google.protobuf.Any typeless_request = 31;
+}
+
+enum FrameType {
+    FRAME_TYPE_UNKNOWN  = 0;
+    FRAME_TYPE_RST      = 1;
+    FRAME_TYPE_CLOSE    = 2;
+    FRAME_TYPE_DATA     = 3;
+    FRAME_TYPE_FEEDBACK = 4;
+}
+
+message Feedback {
+    int64 consumed_size = 1;
+}
+
+message RecordFrame {
+    string project_url      = 1;
+    string record_id        = 2;
+    int64  version          = 3;
+    int64  stream_id        = 4;
+    int64  source_stream_id = 5;
+    FrameType frame_type    = 6;
+    bool   has_continuation = 7;
+    Feedback  feedback      = 8;
+}
