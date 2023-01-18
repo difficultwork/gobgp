@@ -92,42 +92,6 @@ type originInfo struct {
 	stale              bool
 }
 
-type RpkiValidationReasonType string
-
-const (
-	RPKI_VALIDATION_REASON_TYPE_NONE   RpkiValidationReasonType = "none"
-	RPKI_VALIDATION_REASON_TYPE_AS     RpkiValidationReasonType = "as"
-	RPKI_VALIDATION_REASON_TYPE_LENGTH RpkiValidationReasonType = "length"
-)
-
-var RpkiValidationReasonTypeToIntMap = map[RpkiValidationReasonType]int{
-	RPKI_VALIDATION_REASON_TYPE_NONE:   0,
-	RPKI_VALIDATION_REASON_TYPE_AS:     1,
-	RPKI_VALIDATION_REASON_TYPE_LENGTH: 2,
-}
-
-func (v RpkiValidationReasonType) ToInt() int {
-	i, ok := RpkiValidationReasonTypeToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-var IntToRpkiValidationReasonTypeMap = map[int]RpkiValidationReasonType{
-	0: RPKI_VALIDATION_REASON_TYPE_NONE,
-	1: RPKI_VALIDATION_REASON_TYPE_AS,
-	2: RPKI_VALIDATION_REASON_TYPE_LENGTH,
-}
-
-type Validation struct {
-	Status          config.RpkiValidationResultType
-	Reason          RpkiValidationReasonType
-	Matched         []*ROA
-	UnmatchedAs     []*ROA
-	UnmatchedLength []*ROA
-}
-
 type Path struct {
 	info      *originInfo
 	parent    *Path
@@ -141,6 +105,7 @@ type Path struct {
 	// For BGP Nexthop Tracking, this field shows if nexthop is invalidated by IGP.
 	IsNexthopInvalid bool
 	IsWithdraw       bool
+	DstPeer          string
 }
 
 var localSource = &PeerInfo{}
@@ -205,7 +170,7 @@ func UpdatePathAttrs(logger log.Logger, global *config.Global, peer *config.Neig
 			if a.GetFlags()&bgp.BGP_ATTR_FLAG_TRANSITIVE == 0 {
 				path.delPathAttr(a.GetType())
 			}
-		} else {
+		} /* else {
 			switch a.GetType() {
 			case bgp.BGP_ATTR_TYPE_CLUSTER_LIST, bgp.BGP_ATTR_TYPE_ORIGINATOR_ID:
 				if !(peer.State.PeerType == config.PEER_TYPE_INTERNAL && peer.RouteReflector.Config.RouteReflectorClient) {
@@ -213,7 +178,7 @@ func UpdatePathAttrs(logger log.Logger, global *config.Global, peer *config.Neig
 					path.delPathAttr(a.GetType())
 				}
 			}
-		}
+		}*/
 	}
 
 	localAddress := info.LocalAddress
@@ -228,11 +193,9 @@ func UpdatePathAttrs(logger log.Logger, global *config.Global, peer *config.Neig
 		path.RemovePrivateAS(peer.Config.LocalAs, peer.State.RemovePrivateAs)
 
 		// AS_PATH handling
-		confed := peer.IsConfederationMember(global)
-		path.PrependAsn(peer.Config.LocalAs, 1, confed)
-		if !confed {
-			path.removeConfedAs()
-		}
+		// confed := peer.IsConfederationMember(global)
+		path.PrependAsn(peer.Config.LocalAs, 1, false)
+		path.removeConfedAs()
 
 		// MED Handling
 		if med := path.getPathAttr(bgp.BGP_ATTR_TYPE_MULTI_EXIT_DISC); med != nil && !path.IsLocal() {
@@ -261,44 +224,6 @@ func UpdatePathAttrs(logger log.Logger, global *config.Global, peer *config.Neig
 		if pref := path.getPathAttr(bgp.BGP_ATTR_TYPE_LOCAL_PREF); pref == nil {
 			path.setPathAttr(bgp.NewPathAttributeLocalPref(DEFAULT_LOCAL_PREF))
 		}
-
-		// RFC4456: BGP Route Reflection
-		// 8. Avoiding Routing Information Loops
-		info := path.GetSource()
-		if peer.RouteReflector.Config.RouteReflectorClient {
-			// This attribute will carry the BGP Identifier of the originator of the route in the local AS.
-			// A BGP speaker SHOULD NOT create an ORIGINATOR_ID attribute if one already exists.
-			//
-			// RFC4684 3.2 Intra-AS VPN Route Distribution
-			// When advertising RT membership NLRI to a route-reflector client,
-			// the Originator attribute shall be set to the router-id of the
-			// advertiser, and the Next-hop attribute shall be set of the local
-			// address for that session.
-			if path.GetRouteFamily() == bgp.RF_RTC_UC {
-				path.SetNexthop(localAddress)
-				path.setPathAttr(bgp.NewPathAttributeOriginatorId(info.LocalID.String()))
-			} else if path.getPathAttr(bgp.BGP_ATTR_TYPE_ORIGINATOR_ID) == nil {
-				if path.IsLocal() {
-					path.setPathAttr(bgp.NewPathAttributeOriginatorId(global.Config.RouterId))
-				} else {
-					path.setPathAttr(bgp.NewPathAttributeOriginatorId(info.ID.String()))
-				}
-			}
-			// When an RR reflects a route, it MUST prepend the local CLUSTER_ID to the CLUSTER_LIST.
-			// If the CLUSTER_LIST is empty, it MUST create a new one.
-			clusterID := string(peer.RouteReflector.State.RouteReflectorClusterId)
-			if p := path.getPathAttr(bgp.BGP_ATTR_TYPE_CLUSTER_LIST); p == nil {
-				path.setPathAttr(bgp.NewPathAttributeClusterList([]string{clusterID}))
-			} else {
-				clusterList := p.(*bgp.PathAttributeClusterList)
-				newClusterList := make([]string, 0, len(clusterList.Value))
-				for _, ip := range clusterList.Value {
-					newClusterList = append(newClusterList, ip.String())
-				}
-				path.setPathAttr(bgp.NewPathAttributeClusterList(append([]string{clusterID}, newClusterList...)))
-			}
-		}
-
 	} else {
 		logger.Warn("invalid peer type",
 			log.Fields{
@@ -1062,222 +987,4 @@ func (lhs *Path) Compare(rhs *Path) int {
 	m1, _ := lhs.GetMed()
 	m2, _ := rhs.GetMed()
 	return int(m2 - m1)
-}
-
-func (v *Vrf) ToGlobalPath(path *Path) error {
-	nlri := path.GetNlri()
-	switch rf := path.GetRouteFamily(); rf {
-	case bgp.RF_IPv4_UC:
-		n := nlri.(*bgp.IPAddrPrefix)
-		pathIdentifier := path.GetNlri().PathIdentifier()
-		path.OriginInfo().nlri = bgp.NewLabeledVPNIPAddrPrefix(n.Length, n.Prefix.String(), *bgp.NewMPLSLabelStack(v.MplsLabel), v.Rd)
-		path.GetNlri().SetPathIdentifier(pathIdentifier)
-	case bgp.RF_FS_IPv4_UC:
-		n := nlri.(*bgp.FlowSpecIPv4Unicast)
-		pathIdentifier := path.GetNlri().PathIdentifier()
-		path.OriginInfo().nlri = bgp.NewFlowSpecIPv4VPN(v.Rd, n.FlowSpecNLRI.Value)
-		path.GetNlri().SetPathIdentifier(pathIdentifier)
-	case bgp.RF_IPv6_UC:
-		n := nlri.(*bgp.IPv6AddrPrefix)
-		pathIdentifier := path.GetNlri().PathIdentifier()
-		path.OriginInfo().nlri = bgp.NewLabeledVPNIPv6AddrPrefix(n.Length, n.Prefix.String(), *bgp.NewMPLSLabelStack(v.MplsLabel), v.Rd)
-		path.GetNlri().SetPathIdentifier(pathIdentifier)
-	case bgp.RF_FS_IPv6_UC:
-		n := nlri.(*bgp.FlowSpecIPv6Unicast)
-		pathIdentifier := path.GetNlri().PathIdentifier()
-		path.OriginInfo().nlri = bgp.NewFlowSpecIPv6VPN(v.Rd, n.FlowSpecNLRI.Value)
-		path.GetNlri().SetPathIdentifier(pathIdentifier)
-	case bgp.RF_EVPN:
-		n := nlri.(*bgp.EVPNNLRI)
-		switch n.RouteType {
-		case bgp.EVPN_ROUTE_TYPE_MAC_IP_ADVERTISEMENT:
-			n.RouteTypeData.(*bgp.EVPNMacIPAdvertisementRoute).RD = v.Rd
-		case bgp.EVPN_INCLUSIVE_MULTICAST_ETHERNET_TAG:
-			n.RouteTypeData.(*bgp.EVPNMulticastEthernetTagRoute).RD = v.Rd
-		}
-	case bgp.RF_MUP_IPv4, bgp.RF_MUP_IPv6:
-		n := nlri.(*bgp.MUPNLRI)
-		switch n.RouteType {
-		case bgp.MUP_ROUTE_TYPE_INTERWORK_SEGMENT_DISCOVERY:
-			n.RouteTypeData.(*bgp.MUPInterworkSegmentDiscoveryRoute).RD = v.Rd
-		case bgp.MUP_ROUTE_TYPE_DIRECT_SEGMENT_DISCOVERY:
-			n.RouteTypeData.(*bgp.MUPDirectSegmentDiscoveryRoute).RD = v.Rd
-		case bgp.MUP_ROUTE_TYPE_TYPE_1_SESSION_TRANSFORMED:
-			n.RouteTypeData.(*bgp.MUPType1SessionTransformedRoute).RD = v.Rd
-		case bgp.MUP_ROUTE_TYPE_TYPE_2_SESSION_TRANSFORMED:
-			n.RouteTypeData.(*bgp.MUPType2SessionTransformedRoute).RD = v.Rd
-		}
-	default:
-		return fmt.Errorf("unsupported route family for vrf: %s", rf)
-	}
-	path.SetExtCommunities(v.ExportRt, false)
-	return nil
-}
-
-func (p *Path) ToGlobal(vrf *Vrf) *Path {
-	nlri := p.GetNlri()
-	nh := p.GetNexthop()
-	pathId := nlri.PathIdentifier()
-	switch rf := p.GetRouteFamily(); rf {
-	case bgp.RF_IPv4_UC:
-		n := nlri.(*bgp.IPAddrPrefix)
-		nlri = bgp.NewLabeledVPNIPAddrPrefix(n.Length, n.Prefix.String(), *bgp.NewMPLSLabelStack(vrf.MplsLabel), vrf.Rd)
-		nlri.SetPathIdentifier(pathId)
-	case bgp.RF_IPv6_UC:
-		n := nlri.(*bgp.IPv6AddrPrefix)
-		nlri = bgp.NewLabeledVPNIPv6AddrPrefix(n.Length, n.Prefix.String(), *bgp.NewMPLSLabelStack(vrf.MplsLabel), vrf.Rd)
-		nlri.SetPathIdentifier(pathId)
-	case bgp.RF_EVPN:
-		n := nlri.(*bgp.EVPNNLRI)
-		switch n.RouteType {
-		case bgp.EVPN_ROUTE_TYPE_MAC_IP_ADVERTISEMENT:
-			old := n.RouteTypeData.(*bgp.EVPNMacIPAdvertisementRoute)
-			new := &bgp.EVPNMacIPAdvertisementRoute{
-				RD:               vrf.Rd,
-				ESI:              old.ESI,
-				ETag:             old.ETag,
-				MacAddressLength: old.MacAddressLength,
-				MacAddress:       old.MacAddress,
-				IPAddressLength:  old.IPAddressLength,
-				IPAddress:        old.IPAddress,
-				Labels:           old.Labels,
-			}
-			nlri = bgp.NewEVPNNLRI(n.RouteType, new)
-		case bgp.EVPN_INCLUSIVE_MULTICAST_ETHERNET_TAG:
-			old := n.RouteTypeData.(*bgp.EVPNMulticastEthernetTagRoute)
-			new := &bgp.EVPNMulticastEthernetTagRoute{
-				RD:              vrf.Rd,
-				ETag:            old.ETag,
-				IPAddressLength: old.IPAddressLength,
-				IPAddress:       old.IPAddress,
-			}
-			nlri = bgp.NewEVPNNLRI(n.RouteType, new)
-		}
-	case bgp.RF_MUP_IPv4, bgp.RF_MUP_IPv6:
-		n := nlri.(*bgp.MUPNLRI)
-		switch n.RouteType {
-		case bgp.MUP_ROUTE_TYPE_INTERWORK_SEGMENT_DISCOVERY:
-			old := n.RouteTypeData.(*bgp.MUPInterworkSegmentDiscoveryRoute)
-			nlri = bgp.NewMUPInterworkSegmentDiscoveryRoute(vrf.Rd, old.Prefix)
-		case bgp.MUP_ROUTE_TYPE_DIRECT_SEGMENT_DISCOVERY:
-			old := n.RouteTypeData.(*bgp.MUPDirectSegmentDiscoveryRoute)
-			nlri = bgp.NewMUPDirectSegmentDiscoveryRoute(vrf.Rd, old.Address)
-		case bgp.MUP_ROUTE_TYPE_TYPE_1_SESSION_TRANSFORMED:
-			old := n.RouteTypeData.(*bgp.MUPType1SessionTransformedRoute)
-			nlri = bgp.NewMUPType1SessionTransformedRoute(vrf.Rd, old.Prefix, old.TEID, old.QFI, old.EndpointAddress)
-		case bgp.MUP_ROUTE_TYPE_TYPE_2_SESSION_TRANSFORMED:
-			old := n.RouteTypeData.(*bgp.MUPType2SessionTransformedRoute)
-			nlri = bgp.NewMUPType2SessionTransformedRoute(vrf.Rd, old.EndpointAddress, old.TEID)
-		}
-	default:
-		return p
-	}
-	path := NewPath(p.OriginInfo().source, nlri, p.IsWithdraw, p.GetPathAttrs(), p.GetTimestamp(), false)
-	path.SetExtCommunities(vrf.ExportRt, false)
-	path.delPathAttr(bgp.BGP_ATTR_TYPE_NEXT_HOP)
-	path.setPathAttr(bgp.NewPathAttributeMpReachNLRI(nh.String(), []bgp.AddrPrefixInterface{nlri}))
-	return path
-}
-
-func (p *Path) ToLocal() *Path {
-	nlri := p.GetNlri()
-	f := p.GetRouteFamily()
-	localPathId := nlri.PathLocalIdentifier()
-	pathId := nlri.PathIdentifier()
-	switch f {
-	case bgp.RF_IPv4_VPN:
-		n := nlri.(*bgp.LabeledVPNIPAddrPrefix)
-		_, c, _ := net.ParseCIDR(n.IPPrefix())
-		ones, _ := c.Mask.Size()
-		nlri = bgp.NewIPAddrPrefix(uint8(ones), c.IP.String())
-		nlri.SetPathLocalIdentifier(localPathId)
-		nlri.SetPathIdentifier(pathId)
-	case bgp.RF_FS_IPv4_VPN:
-		n := nlri.(*bgp.FlowSpecIPv4VPN)
-		nlri = bgp.NewFlowSpecIPv4Unicast(n.FlowSpecNLRI.Value)
-		nlri.SetPathLocalIdentifier(localPathId)
-		nlri.SetPathIdentifier(pathId)
-	case bgp.RF_IPv6_VPN:
-		n := nlri.(*bgp.LabeledVPNIPv6AddrPrefix)
-		_, c, _ := net.ParseCIDR(n.IPPrefix())
-		ones, _ := c.Mask.Size()
-		nlri = bgp.NewIPv6AddrPrefix(uint8(ones), c.IP.String())
-		nlri.SetPathLocalIdentifier(localPathId)
-		nlri.SetPathIdentifier(pathId)
-	case bgp.RF_FS_IPv6_VPN:
-		n := nlri.(*bgp.FlowSpecIPv6VPN)
-		nlri = bgp.NewFlowSpecIPv6Unicast(n.FlowSpecNLRI.Value)
-		nlri.SetPathLocalIdentifier(localPathId)
-		nlri.SetPathIdentifier(pathId)
-	default:
-		return p
-	}
-	path := NewPath(p.OriginInfo().source, nlri, p.IsWithdraw, p.GetPathAttrs(), p.GetTimestamp(), false)
-	switch f {
-	case bgp.RF_IPv4_VPN, bgp.RF_IPv6_VPN:
-		path.delPathAttr(bgp.BGP_ATTR_TYPE_EXTENDED_COMMUNITIES)
-	case bgp.RF_FS_IPv4_VPN, bgp.RF_FS_IPv6_VPN:
-		extcomms := path.GetExtCommunities()
-		newExtComms := make([]bgp.ExtendedCommunityInterface, 0, len(extcomms))
-		for _, extComm := range extcomms {
-			_, subType := extComm.GetTypes()
-			if subType == bgp.EC_SUBTYPE_ROUTE_TARGET {
-				continue
-			}
-			newExtComms = append(newExtComms, extComm)
-		}
-		path.SetExtCommunities(newExtComms, true)
-	}
-
-	if f == bgp.RF_IPv4_VPN {
-		nh := path.GetNexthop()
-		path.delPathAttr(bgp.BGP_ATTR_TYPE_MP_REACH_NLRI)
-		path.setPathAttr(bgp.NewPathAttributeNextHop(nh.String()))
-	}
-	path.IsNexthopInvalid = p.IsNexthopInvalid
-	return path
-}
-
-func (p *Path) SetHash(v uint32) {
-	p.attrsHash = v
-}
-
-func (p *Path) GetHash() uint32 {
-	return p.attrsHash
-}
-
-func nlriToIPNet(nlri bgp.AddrPrefixInterface) *net.IPNet {
-	switch T := nlri.(type) {
-	case *bgp.IPAddrPrefix:
-		return &net.IPNet{
-			IP:   net.IP(T.Prefix.To4()),
-			Mask: net.CIDRMask(int(T.Length), 32),
-		}
-	case *bgp.IPv6AddrPrefix:
-		return &net.IPNet{
-			IP:   net.IP(T.Prefix.To16()),
-			Mask: net.CIDRMask(int(T.Length), 128),
-		}
-	case *bgp.LabeledIPAddrPrefix:
-		return &net.IPNet{
-			IP:   net.IP(T.Prefix.To4()),
-			Mask: net.CIDRMask(int(T.Length)-T.Labels.Len()*8, 32),
-		}
-	case *bgp.LabeledIPv6AddrPrefix:
-		return &net.IPNet{
-			IP:   net.IP(T.Prefix.To16()),
-			Mask: net.CIDRMask(int(T.Length)-T.Labels.Len()*8, 128),
-		}
-	case *bgp.LabeledVPNIPAddrPrefix:
-		return &net.IPNet{
-			IP:   net.IP(T.Prefix.To4()),
-			Mask: net.CIDRMask(int(T.Length)-T.Labels.Len()*8-T.RD.Len()*8, 32),
-		}
-	case *bgp.LabeledVPNIPv6AddrPrefix:
-		return &net.IPNet{
-			IP:   net.IP(T.Prefix.To16()),
-			Mask: net.CIDRMask(int(T.Length)-T.Labels.Len()*8-T.RD.Len()*8, 128),
-		}
-	}
-	return nil
 }

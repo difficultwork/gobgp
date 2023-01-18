@@ -33,15 +33,6 @@ func mapkey(index int, name string) string {
 	return fmt.Sprintf("%v", index)
 }
 
-// typedef for typedef openconfig-types:std-regexp.
-type StdRegexp string
-
-// typedef for typedef openconfig-types:percentage.
-type Percentage uint8
-
-// typedef for typedef bgp-types:rr-cluster-id-type.
-type RrClusterIdType string
-
 // typedef for identity bgp-types:remove-private-as-option.
 // set of options for configuring how private AS path numbers
 // are removed from advertisements.
@@ -76,9 +67,6 @@ func (v RemovePrivateAsOption) ToInt() int {
 	}
 	return i
 }
-
-// typedef for typedef bgp-types:bgp-community-regexp-type.
-type BgpCommunityRegexpType StdRegexp
 
 // typedef for identity bgp-types:community-type.
 // type describing variations of community attributes:
@@ -123,12 +111,6 @@ func (v CommunityType) ToInt() int {
 	return i
 }
 
-// typedef for typedef bgp-types:bgp-ext-community-type.
-type BgpExtCommunityType string
-
-// typedef for typedef bgp-types:bgp-std-community-type.
-type BgpStdCommunityType string
-
 // typedef for identity bgp-types:peer-type.
 // labels a peer or peer group as explicitly internal or
 // external.
@@ -158,77 +140,6 @@ func (v PeerType) Validate() error {
 
 func (v PeerType) ToInt() int {
 	i, ok := PeerTypeToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for identity bgp-types:bgp-session-direction.
-// Type to describe the direction of NLRI transmission.
-type BgpSessionDirection string
-
-const (
-	BGP_SESSION_DIRECTION_INBOUND  BgpSessionDirection = "inbound"
-	BGP_SESSION_DIRECTION_OUTBOUND BgpSessionDirection = "outbound"
-)
-
-var BgpSessionDirectionToIntMap = map[BgpSessionDirection]int{
-	BGP_SESSION_DIRECTION_INBOUND:  0,
-	BGP_SESSION_DIRECTION_OUTBOUND: 1,
-}
-
-var IntToBgpSessionDirectionMap = map[int]BgpSessionDirection{
-	0: BGP_SESSION_DIRECTION_INBOUND,
-	1: BGP_SESSION_DIRECTION_OUTBOUND,
-}
-
-func (v BgpSessionDirection) Validate() error {
-	if _, ok := BgpSessionDirectionToIntMap[v]; !ok {
-		return fmt.Errorf("invalid BgpSessionDirection: %s", v)
-	}
-	return nil
-}
-
-func (v BgpSessionDirection) ToInt() int {
-	i, ok := BgpSessionDirectionToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for identity bgp-types:bgp-origin-attr-type.
-// Type definition for standard BGP origin attribute.
-type BgpOriginAttrType string
-
-const (
-	BGP_ORIGIN_ATTR_TYPE_IGP        BgpOriginAttrType = "igp"
-	BGP_ORIGIN_ATTR_TYPE_EGP        BgpOriginAttrType = "egp"
-	BGP_ORIGIN_ATTR_TYPE_INCOMPLETE BgpOriginAttrType = "incomplete"
-)
-
-var BgpOriginAttrTypeToIntMap = map[BgpOriginAttrType]int{
-	BGP_ORIGIN_ATTR_TYPE_IGP:        0,
-	BGP_ORIGIN_ATTR_TYPE_EGP:        1,
-	BGP_ORIGIN_ATTR_TYPE_INCOMPLETE: 2,
-}
-
-var IntToBgpOriginAttrTypeMap = map[int]BgpOriginAttrType{
-	0: BGP_ORIGIN_ATTR_TYPE_IGP,
-	1: BGP_ORIGIN_ATTR_TYPE_EGP,
-	2: BGP_ORIGIN_ATTR_TYPE_INCOMPLETE,
-}
-
-func (v BgpOriginAttrType) Validate() error {
-	if _, ok := BgpOriginAttrTypeToIntMap[v]; !ok {
-		return fmt.Errorf("invalid BgpOriginAttrType: %s", v)
-	}
-	return nil
-}
-
-func (v BgpOriginAttrType) ToInt() int {
-	i, ok := BgpOriginAttrTypeToIntMap[v]
 	if !ok {
 		return -1
 	}
@@ -384,284 +295,6 @@ func (v BgpCapability) ToInt() int {
 	return i
 }
 
-// typedef for identity bgp-types:bgp-well-known-std-community.
-// Reserved communities within the standard community space
-// defined by RFC1997. These communities must fall within the
-// range 0x00000000 to 0xFFFFFFFF.
-type BgpWellKnownStdCommunity string
-
-const (
-	BGP_WELL_KNOWN_STD_COMMUNITY_NO_EXPORT           BgpWellKnownStdCommunity = "no_export"
-	BGP_WELL_KNOWN_STD_COMMUNITY_NO_ADVERTISE        BgpWellKnownStdCommunity = "no_advertise"
-	BGP_WELL_KNOWN_STD_COMMUNITY_NO_EXPORT_SUBCONFED BgpWellKnownStdCommunity = "no_export_subconfed"
-	BGP_WELL_KNOWN_STD_COMMUNITY_NOPEER              BgpWellKnownStdCommunity = "nopeer"
-)
-
-var BgpWellKnownStdCommunityToIntMap = map[BgpWellKnownStdCommunity]int{
-	BGP_WELL_KNOWN_STD_COMMUNITY_NO_EXPORT:           0,
-	BGP_WELL_KNOWN_STD_COMMUNITY_NO_ADVERTISE:        1,
-	BGP_WELL_KNOWN_STD_COMMUNITY_NO_EXPORT_SUBCONFED: 2,
-	BGP_WELL_KNOWN_STD_COMMUNITY_NOPEER:              3,
-}
-
-var IntToBgpWellKnownStdCommunityMap = map[int]BgpWellKnownStdCommunity{
-	0: BGP_WELL_KNOWN_STD_COMMUNITY_NO_EXPORT,
-	1: BGP_WELL_KNOWN_STD_COMMUNITY_NO_ADVERTISE,
-	2: BGP_WELL_KNOWN_STD_COMMUNITY_NO_EXPORT_SUBCONFED,
-	3: BGP_WELL_KNOWN_STD_COMMUNITY_NOPEER,
-}
-
-func (v BgpWellKnownStdCommunity) Validate() error {
-	if _, ok := BgpWellKnownStdCommunityToIntMap[v]; !ok {
-		return fmt.Errorf("invalid BgpWellKnownStdCommunity: %s", v)
-	}
-	return nil
-}
-
-func (v BgpWellKnownStdCommunity) ToInt() int {
-	i, ok := BgpWellKnownStdCommunityToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for identity ptypes:match-set-options-restricted-type.
-// Options that govern the behavior of a match statement.  The
-// default behavior is ANY, i.e., the given value matches any
-// of the members of the defined set.  Note this type is a
-// restricted version of the match-set-options-type.
-type MatchSetOptionsRestrictedType string
-
-const (
-	MATCH_SET_OPTIONS_RESTRICTED_TYPE_ANY    MatchSetOptionsRestrictedType = "any"
-	MATCH_SET_OPTIONS_RESTRICTED_TYPE_INVERT MatchSetOptionsRestrictedType = "invert"
-)
-
-var MatchSetOptionsRestrictedTypeToIntMap = map[MatchSetOptionsRestrictedType]int{
-	MATCH_SET_OPTIONS_RESTRICTED_TYPE_ANY:    0,
-	MATCH_SET_OPTIONS_RESTRICTED_TYPE_INVERT: 1,
-}
-
-var IntToMatchSetOptionsRestrictedTypeMap = map[int]MatchSetOptionsRestrictedType{
-	0: MATCH_SET_OPTIONS_RESTRICTED_TYPE_ANY,
-	1: MATCH_SET_OPTIONS_RESTRICTED_TYPE_INVERT,
-}
-
-func (v MatchSetOptionsRestrictedType) Validate() error {
-	if _, ok := MatchSetOptionsRestrictedTypeToIntMap[v]; !ok {
-		return fmt.Errorf("invalid MatchSetOptionsRestrictedType: %s", v)
-	}
-	return nil
-}
-
-func (v MatchSetOptionsRestrictedType) Default() MatchSetOptionsRestrictedType {
-	return MATCH_SET_OPTIONS_RESTRICTED_TYPE_ANY
-}
-
-func (v MatchSetOptionsRestrictedType) DefaultAsNeeded() MatchSetOptionsRestrictedType {
-	if string(v) == "" {
-		return v.Default()
-	}
-	return v
-}
-func (v MatchSetOptionsRestrictedType) ToInt() int {
-	_v := v.DefaultAsNeeded()
-	i, ok := MatchSetOptionsRestrictedTypeToIntMap[_v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for identity ptypes:match-set-options-type.
-// Options that govern the behavior of a match statement.  The
-// default behavior is ANY, i.e., the given value matches any
-// of the members of the defined set.
-type MatchSetOptionsType string
-
-const (
-	MATCH_SET_OPTIONS_TYPE_ANY    MatchSetOptionsType = "any"
-	MATCH_SET_OPTIONS_TYPE_ALL    MatchSetOptionsType = "all"
-	MATCH_SET_OPTIONS_TYPE_INVERT MatchSetOptionsType = "invert"
-)
-
-var MatchSetOptionsTypeToIntMap = map[MatchSetOptionsType]int{
-	MATCH_SET_OPTIONS_TYPE_ANY:    0,
-	MATCH_SET_OPTIONS_TYPE_ALL:    1,
-	MATCH_SET_OPTIONS_TYPE_INVERT: 2,
-}
-
-var IntToMatchSetOptionsTypeMap = map[int]MatchSetOptionsType{
-	0: MATCH_SET_OPTIONS_TYPE_ANY,
-	1: MATCH_SET_OPTIONS_TYPE_ALL,
-	2: MATCH_SET_OPTIONS_TYPE_INVERT,
-}
-
-func (v MatchSetOptionsType) Validate() error {
-	if _, ok := MatchSetOptionsTypeToIntMap[v]; !ok {
-		return fmt.Errorf("invalid MatchSetOptionsType: %s", v)
-	}
-	return nil
-}
-
-func (v MatchSetOptionsType) Default() MatchSetOptionsType {
-	return MATCH_SET_OPTIONS_TYPE_ANY
-}
-
-func (v MatchSetOptionsType) DefaultAsNeeded() MatchSetOptionsType {
-	if string(v) == "" {
-		return v.Default()
-	}
-	return v
-}
-func (v MatchSetOptionsType) ToInt() int {
-	_v := v.DefaultAsNeeded()
-	i, ok := MatchSetOptionsTypeToIntMap[_v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for typedef ptypes:tag-type.
-type TagType string
-
-// typedef for identity ptypes:install-protocol-type.
-// Base type for protocols which can install prefixes into the
-// RIB.
-type InstallProtocolType string
-
-const (
-	INSTALL_PROTOCOL_TYPE_BGP                InstallProtocolType = "bgp"
-	INSTALL_PROTOCOL_TYPE_ISIS               InstallProtocolType = "isis"
-	INSTALL_PROTOCOL_TYPE_OSPF               InstallProtocolType = "ospf"
-	INSTALL_PROTOCOL_TYPE_OSPF3              InstallProtocolType = "ospf3"
-	INSTALL_PROTOCOL_TYPE_STATIC             InstallProtocolType = "static"
-	INSTALL_PROTOCOL_TYPE_DIRECTLY_CONNECTED InstallProtocolType = "directly-connected"
-	INSTALL_PROTOCOL_TYPE_LOCAL_AGGREGATE    InstallProtocolType = "local-aggregate"
-)
-
-var InstallProtocolTypeToIntMap = map[InstallProtocolType]int{
-	INSTALL_PROTOCOL_TYPE_BGP:                0,
-	INSTALL_PROTOCOL_TYPE_ISIS:               1,
-	INSTALL_PROTOCOL_TYPE_OSPF:               2,
-	INSTALL_PROTOCOL_TYPE_OSPF3:              3,
-	INSTALL_PROTOCOL_TYPE_STATIC:             4,
-	INSTALL_PROTOCOL_TYPE_DIRECTLY_CONNECTED: 5,
-	INSTALL_PROTOCOL_TYPE_LOCAL_AGGREGATE:    6,
-}
-
-var IntToInstallProtocolTypeMap = map[int]InstallProtocolType{
-	0: INSTALL_PROTOCOL_TYPE_BGP,
-	1: INSTALL_PROTOCOL_TYPE_ISIS,
-	2: INSTALL_PROTOCOL_TYPE_OSPF,
-	3: INSTALL_PROTOCOL_TYPE_OSPF3,
-	4: INSTALL_PROTOCOL_TYPE_STATIC,
-	5: INSTALL_PROTOCOL_TYPE_DIRECTLY_CONNECTED,
-	6: INSTALL_PROTOCOL_TYPE_LOCAL_AGGREGATE,
-}
-
-func (v InstallProtocolType) Validate() error {
-	if _, ok := InstallProtocolTypeToIntMap[v]; !ok {
-		return fmt.Errorf("invalid InstallProtocolType: %s", v)
-	}
-	return nil
-}
-
-func (v InstallProtocolType) ToInt() int {
-	i, ok := InstallProtocolTypeToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for identity ptypes:attribute-comparison.
-// base type for supported comparison operators on route
-// attributes.
-type AttributeComparison string
-
-const (
-	ATTRIBUTE_COMPARISON_ATTRIBUTE_EQ AttributeComparison = "attribute-eq"
-	ATTRIBUTE_COMPARISON_ATTRIBUTE_GE AttributeComparison = "attribute-ge"
-	ATTRIBUTE_COMPARISON_ATTRIBUTE_LE AttributeComparison = "attribute-le"
-	ATTRIBUTE_COMPARISON_EQ           AttributeComparison = "eq"
-	ATTRIBUTE_COMPARISON_GE           AttributeComparison = "ge"
-	ATTRIBUTE_COMPARISON_LE           AttributeComparison = "le"
-)
-
-var AttributeComparisonToIntMap = map[AttributeComparison]int{
-	ATTRIBUTE_COMPARISON_ATTRIBUTE_EQ: 0,
-	ATTRIBUTE_COMPARISON_ATTRIBUTE_GE: 1,
-	ATTRIBUTE_COMPARISON_ATTRIBUTE_LE: 2,
-	ATTRIBUTE_COMPARISON_EQ:           3,
-	ATTRIBUTE_COMPARISON_GE:           4,
-	ATTRIBUTE_COMPARISON_LE:           5,
-}
-
-var IntToAttributeComparisonMap = map[int]AttributeComparison{
-	0: ATTRIBUTE_COMPARISON_ATTRIBUTE_EQ,
-	1: ATTRIBUTE_COMPARISON_ATTRIBUTE_GE,
-	2: ATTRIBUTE_COMPARISON_ATTRIBUTE_LE,
-	3: ATTRIBUTE_COMPARISON_EQ,
-	4: ATTRIBUTE_COMPARISON_GE,
-	5: ATTRIBUTE_COMPARISON_LE,
-}
-
-func (v AttributeComparison) Validate() error {
-	if _, ok := AttributeComparisonToIntMap[v]; !ok {
-		return fmt.Errorf("invalid AttributeComparison: %s", v)
-	}
-	return nil
-}
-
-func (v AttributeComparison) ToInt() int {
-	i, ok := AttributeComparisonToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for identity rpol:route-disposition.
-// Select the final disposition for the route, either
-// accept or reject.
-type RouteDisposition string
-
-const (
-	ROUTE_DISPOSITION_NONE         RouteDisposition = "none"
-	ROUTE_DISPOSITION_ACCEPT_ROUTE RouteDisposition = "accept-route"
-	ROUTE_DISPOSITION_REJECT_ROUTE RouteDisposition = "reject-route"
-)
-
-var RouteDispositionToIntMap = map[RouteDisposition]int{
-	ROUTE_DISPOSITION_NONE:         0,
-	ROUTE_DISPOSITION_ACCEPT_ROUTE: 1,
-	ROUTE_DISPOSITION_REJECT_ROUTE: 2,
-}
-
-var IntToRouteDispositionMap = map[int]RouteDisposition{
-	0: ROUTE_DISPOSITION_NONE,
-	1: ROUTE_DISPOSITION_ACCEPT_ROUTE,
-	2: ROUTE_DISPOSITION_REJECT_ROUTE,
-}
-
-func (v RouteDisposition) Validate() error {
-	if _, ok := RouteDispositionToIntMap[v]; !ok {
-		return fmt.Errorf("invalid RouteDisposition: %s", v)
-	}
-	return nil
-}
-
-func (v RouteDisposition) ToInt() int {
-	i, ok := RouteDispositionToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
 // typedef for identity rpol:route-type.
 // Condition to check the route type in the route update.
 type RouteType string
@@ -696,41 +329,6 @@ func (v RouteType) Validate() error {
 
 func (v RouteType) ToInt() int {
 	i, ok := RouteTypeToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for identity rpol:default-policy-type.
-// type used to specify default route disposition in
-// a policy chain.
-type DefaultPolicyType string
-
-const (
-	DEFAULT_POLICY_TYPE_ACCEPT_ROUTE DefaultPolicyType = "accept-route"
-	DEFAULT_POLICY_TYPE_REJECT_ROUTE DefaultPolicyType = "reject-route"
-)
-
-var DefaultPolicyTypeToIntMap = map[DefaultPolicyType]int{
-	DEFAULT_POLICY_TYPE_ACCEPT_ROUTE: 0,
-	DEFAULT_POLICY_TYPE_REJECT_ROUTE: 1,
-}
-
-var IntToDefaultPolicyTypeMap = map[int]DefaultPolicyType{
-	0: DEFAULT_POLICY_TYPE_ACCEPT_ROUTE,
-	1: DEFAULT_POLICY_TYPE_REJECT_ROUTE,
-}
-
-func (v DefaultPolicyType) Validate() error {
-	if _, ok := DefaultPolicyTypeToIntMap[v]; !ok {
-		return fmt.Errorf("invalid DefaultPolicyType: %s", v)
-	}
-	return nil
-}
-
-func (v DefaultPolicyType) ToInt() int {
-	i, ok := DefaultPolicyTypeToIntMap[v]
 	if !ok {
 		return -1
 	}
@@ -783,1212 +381,6 @@ func (v SessionState) ToInt() int {
 	return i
 }
 
-// typedef for identity bgp:admin-state.
-type AdminState string
-
-const (
-	ADMIN_STATE_UP     AdminState = "up"
-	ADMIN_STATE_DOWN   AdminState = "down"
-	ADMIN_STATE_PFX_CT AdminState = "pfx_ct"
-)
-
-var AdminStateToIntMap = map[AdminState]int{
-	ADMIN_STATE_UP:     0,
-	ADMIN_STATE_DOWN:   1,
-	ADMIN_STATE_PFX_CT: 2,
-}
-
-var IntToAdminStateMap = map[int]AdminState{
-	0: ADMIN_STATE_UP,
-	1: ADMIN_STATE_DOWN,
-	2: ADMIN_STATE_PFX_CT,
-}
-
-func (v AdminState) Validate() error {
-	if _, ok := AdminStateToIntMap[v]; !ok {
-		return fmt.Errorf("invalid AdminState: %s", v)
-	}
-	return nil
-}
-
-func (v AdminState) ToInt() int {
-	i, ok := AdminStateToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for identity bgp:mode.
-// Ths leaf indicates the mode of operation of BGP graceful
-// restart with the peer.
-type Mode string
-
-const (
-	MODE_HELPER_ONLY   Mode = "helper-only"
-	MODE_BILATERAL     Mode = "bilateral"
-	MODE_REMOTE_HELPER Mode = "remote-helper"
-)
-
-var ModeToIntMap = map[Mode]int{
-	MODE_HELPER_ONLY:   0,
-	MODE_BILATERAL:     1,
-	MODE_REMOTE_HELPER: 2,
-}
-
-var IntToModeMap = map[int]Mode{
-	0: MODE_HELPER_ONLY,
-	1: MODE_BILATERAL,
-	2: MODE_REMOTE_HELPER,
-}
-
-func (v Mode) Validate() error {
-	if _, ok := ModeToIntMap[v]; !ok {
-		return fmt.Errorf("invalid Mode: %s", v)
-	}
-	return nil
-}
-
-func (v Mode) ToInt() int {
-	i, ok := ModeToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for typedef bgp-pol:bgp-next-hop-type.
-type BgpNextHopType string
-
-// typedef for typedef bgp-pol:bgp-as-path-prepend-repeat.
-type BgpAsPathPrependRepeat uint8
-
-// typedef for typedef bgp-pol:bgp-set-med-type.
-type BgpSetMedType string
-
-// typedef for identity bgp-pol:bgp-set-community-option-type.
-// Type definition for options when setting the community
-// attribute in a policy action.
-type BgpSetCommunityOptionType string
-
-const (
-	BGP_SET_COMMUNITY_OPTION_TYPE_ADD     BgpSetCommunityOptionType = "add"
-	BGP_SET_COMMUNITY_OPTION_TYPE_REMOVE  BgpSetCommunityOptionType = "remove"
-	BGP_SET_COMMUNITY_OPTION_TYPE_REPLACE BgpSetCommunityOptionType = "replace"
-)
-
-var BgpSetCommunityOptionTypeToIntMap = map[BgpSetCommunityOptionType]int{
-	BGP_SET_COMMUNITY_OPTION_TYPE_ADD:     0,
-	BGP_SET_COMMUNITY_OPTION_TYPE_REMOVE:  1,
-	BGP_SET_COMMUNITY_OPTION_TYPE_REPLACE: 2,
-}
-
-var IntToBgpSetCommunityOptionTypeMap = map[int]BgpSetCommunityOptionType{
-	0: BGP_SET_COMMUNITY_OPTION_TYPE_ADD,
-	1: BGP_SET_COMMUNITY_OPTION_TYPE_REMOVE,
-	2: BGP_SET_COMMUNITY_OPTION_TYPE_REPLACE,
-}
-
-func (v BgpSetCommunityOptionType) Validate() error {
-	if _, ok := BgpSetCommunityOptionTypeToIntMap[v]; !ok {
-		return fmt.Errorf("invalid BgpSetCommunityOptionType: %s", v)
-	}
-	return nil
-}
-
-func (v BgpSetCommunityOptionType) ToInt() int {
-	i, ok := BgpSetCommunityOptionTypeToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for identity gobgp:bmp-route-monitoring-policy-type.
-type BmpRouteMonitoringPolicyType string
-
-const (
-	BMP_ROUTE_MONITORING_POLICY_TYPE_PRE_POLICY  BmpRouteMonitoringPolicyType = "pre-policy"
-	BMP_ROUTE_MONITORING_POLICY_TYPE_POST_POLICY BmpRouteMonitoringPolicyType = "post-policy"
-	BMP_ROUTE_MONITORING_POLICY_TYPE_BOTH        BmpRouteMonitoringPolicyType = "both"
-	BMP_ROUTE_MONITORING_POLICY_TYPE_LOCAL_RIB   BmpRouteMonitoringPolicyType = "local-rib"
-	BMP_ROUTE_MONITORING_POLICY_TYPE_ALL         BmpRouteMonitoringPolicyType = "all"
-)
-
-var BmpRouteMonitoringPolicyTypeToIntMap = map[BmpRouteMonitoringPolicyType]int{
-	BMP_ROUTE_MONITORING_POLICY_TYPE_PRE_POLICY:  0,
-	BMP_ROUTE_MONITORING_POLICY_TYPE_POST_POLICY: 1,
-	BMP_ROUTE_MONITORING_POLICY_TYPE_BOTH:        2,
-	BMP_ROUTE_MONITORING_POLICY_TYPE_LOCAL_RIB:   3,
-	BMP_ROUTE_MONITORING_POLICY_TYPE_ALL:         4,
-}
-
-var IntToBmpRouteMonitoringPolicyTypeMap = map[int]BmpRouteMonitoringPolicyType{
-	0: BMP_ROUTE_MONITORING_POLICY_TYPE_PRE_POLICY,
-	1: BMP_ROUTE_MONITORING_POLICY_TYPE_POST_POLICY,
-	2: BMP_ROUTE_MONITORING_POLICY_TYPE_BOTH,
-	3: BMP_ROUTE_MONITORING_POLICY_TYPE_LOCAL_RIB,
-	4: BMP_ROUTE_MONITORING_POLICY_TYPE_ALL,
-}
-
-func (v BmpRouteMonitoringPolicyType) Validate() error {
-	if _, ok := BmpRouteMonitoringPolicyTypeToIntMap[v]; !ok {
-		return fmt.Errorf("invalid BmpRouteMonitoringPolicyType: %s", v)
-	}
-	return nil
-}
-
-func (v BmpRouteMonitoringPolicyType) ToInt() int {
-	i, ok := BmpRouteMonitoringPolicyTypeToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for identity gobgp:mrt-type.
-type MrtType string
-
-const (
-	MRT_TYPE_UPDATES MrtType = "updates"
-	MRT_TYPE_TABLE   MrtType = "table"
-)
-
-var MrtTypeToIntMap = map[MrtType]int{
-	MRT_TYPE_UPDATES: 0,
-	MRT_TYPE_TABLE:   1,
-}
-
-var IntToMrtTypeMap = map[int]MrtType{
-	0: MRT_TYPE_UPDATES,
-	1: MRT_TYPE_TABLE,
-}
-
-func (v MrtType) Validate() error {
-	if _, ok := MrtTypeToIntMap[v]; !ok {
-		return fmt.Errorf("invalid MrtType: %s", v)
-	}
-	return nil
-}
-
-func (v MrtType) ToInt() int {
-	i, ok := MrtTypeToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// typedef for identity gobgp:rpki-validation-result-type.
-// indicate the validation result of RPKI based on ROA.
-type RpkiValidationResultType string
-
-const (
-	RPKI_VALIDATION_RESULT_TYPE_NONE      RpkiValidationResultType = "none"
-	RPKI_VALIDATION_RESULT_TYPE_NOT_FOUND RpkiValidationResultType = "not-found"
-	RPKI_VALIDATION_RESULT_TYPE_VALID     RpkiValidationResultType = "valid"
-	RPKI_VALIDATION_RESULT_TYPE_INVALID   RpkiValidationResultType = "invalid"
-)
-
-var RpkiValidationResultTypeToIntMap = map[RpkiValidationResultType]int{
-	RPKI_VALIDATION_RESULT_TYPE_NONE:      0,
-	RPKI_VALIDATION_RESULT_TYPE_NOT_FOUND: 1,
-	RPKI_VALIDATION_RESULT_TYPE_VALID:     2,
-	RPKI_VALIDATION_RESULT_TYPE_INVALID:   3,
-}
-
-var IntToRpkiValidationResultTypeMap = map[int]RpkiValidationResultType{
-	0: RPKI_VALIDATION_RESULT_TYPE_NONE,
-	1: RPKI_VALIDATION_RESULT_TYPE_NOT_FOUND,
-	2: RPKI_VALIDATION_RESULT_TYPE_VALID,
-	3: RPKI_VALIDATION_RESULT_TYPE_INVALID,
-}
-
-func (v RpkiValidationResultType) Validate() error {
-	if _, ok := RpkiValidationResultTypeToIntMap[v]; !ok {
-		return fmt.Errorf("invalid RpkiValidationResultType: %s", v)
-	}
-	return nil
-}
-
-func (v RpkiValidationResultType) ToInt() int {
-	i, ok := RpkiValidationResultTypeToIntMap[v]
-	if !ok {
-		return -1
-	}
-	return i
-}
-
-// struct for container gobgp:state.
-type DynamicNeighborState struct {
-	// original -> gobgp:prefix
-	Prefix string `mapstructure:"prefix" json:"prefix,omitempty"`
-	// original -> gobgp:peer-group
-	PeerGroup string `mapstructure:"peer-group" json:"peer-group,omitempty"`
-}
-
-// struct for container gobgp:config.
-type DynamicNeighborConfig struct {
-	// original -> gobgp:prefix
-	Prefix string `mapstructure:"prefix" json:"prefix,omitempty"`
-	// original -> gobgp:peer-group
-	PeerGroup string `mapstructure:"peer-group" json:"peer-group,omitempty"`
-}
-
-func (lhs *DynamicNeighborConfig) Equal(rhs *DynamicNeighborConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Prefix != rhs.Prefix {
-		return false
-	}
-	if lhs.PeerGroup != rhs.PeerGroup {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:dynamic-neighbor.
-type DynamicNeighbor struct {
-	// original -> gobgp:prefix
-	// original -> gobgp:dynamic-neighbor-config
-	Config DynamicNeighborConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> gobgp:dynamic-neighbor-state
-	State DynamicNeighborState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *DynamicNeighbor) Equal(rhs *DynamicNeighbor) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:state.
-type CollectorState struct {
-	// original -> gobgp:url
-	Url string `mapstructure:"url" json:"url,omitempty"`
-	// original -> gobgp:db-name
-	DbName string `mapstructure:"db-name" json:"db-name,omitempty"`
-	// original -> gobgp:table-dump-interval
-	TableDumpInterval uint64 `mapstructure:"table-dump-interval" json:"table-dump-interval,omitempty"`
-}
-
-// struct for container gobgp:config.
-type CollectorConfig struct {
-	// original -> gobgp:url
-	Url string `mapstructure:"url" json:"url,omitempty"`
-	// original -> gobgp:db-name
-	DbName string `mapstructure:"db-name" json:"db-name,omitempty"`
-	// original -> gobgp:table-dump-interval
-	TableDumpInterval uint64 `mapstructure:"table-dump-interval" json:"table-dump-interval,omitempty"`
-}
-
-func (lhs *CollectorConfig) Equal(rhs *CollectorConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Url != rhs.Url {
-		return false
-	}
-	if lhs.DbName != rhs.DbName {
-		return false
-	}
-	if lhs.TableDumpInterval != rhs.TableDumpInterval {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:collector.
-type Collector struct {
-	// original -> gobgp:collector-config
-	Config CollectorConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> gobgp:collector-state
-	State CollectorState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *Collector) Equal(rhs *Collector) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:state.
-type ZebraState struct {
-	// original -> gobgp:enabled
-	// gobgp:enabled's original type is boolean.
-	// Configure enabling to connect to zebra.
-	Enabled bool `mapstructure:"enabled" json:"enabled,omitempty"`
-	// original -> gobgp:url
-	// Configure url for zebra.
-	Url string `mapstructure:"url" json:"url,omitempty"`
-	// original -> gobgp:redistribute-route-type
-	RedistributeRouteTypeList []string `mapstructure:"redistribute-route-type-list" json:"redistribute-route-type-list,omitempty"`
-	// original -> gobgp:version
-	// Configure version of zebra protocol.  Default is 2.
-	// Supported version are 2 or 3 for Quagga and 4, 5 or 6 for FRRouting.
-	Version uint8 `mapstructure:"version" json:"version,omitempty"`
-	// original -> gobgp:nexthop-trigger-enable
-	// gobgp:nexthop-trigger-enable's original type is boolean.
-	NexthopTriggerEnable bool `mapstructure:"nexthop-trigger-enable" json:"nexthop-trigger-enable,omitempty"`
-	// original -> gobgp:nexthop-trigger-delay
-	NexthopTriggerDelay uint8 `mapstructure:"nexthop-trigger-delay" json:"nexthop-trigger-delay,omitempty"`
-	// original -> gobgp:mpls-label-range-size
-	// Configure MPLS label range size which will be requested to
-	// FRR/Zebra.
-	MplsLabelRangeSize uint32 `mapstructure:"mpls-label-range-size" json:"mpls-label-range-size,omitempty"`
-	// original -> gobgp:software-name
-	// Configure zebra software name.
-	// frr4, cumulus, frr6, frr7, frr7.2 and frr7.3 can be used.
-	SoftwareName string `mapstructure:"software-name" json:"software-name,omitempty"`
-}
-
-// struct for container gobgp:config.
-type ZebraConfig struct {
-	// original -> gobgp:enabled
-	// gobgp:enabled's original type is boolean.
-	// Configure enabling to connect to zebra.
-	Enabled bool `mapstructure:"enabled" json:"enabled,omitempty"`
-	// original -> gobgp:url
-	// Configure url for zebra.
-	Url string `mapstructure:"url" json:"url,omitempty"`
-	// original -> gobgp:redistribute-route-type
-	RedistributeRouteTypeList []string `mapstructure:"redistribute-route-type-list" json:"redistribute-route-type-list,omitempty"`
-	// original -> gobgp:version
-	// Configure version of zebra protocol.  Default is 2.
-	// Supported version are 2 or 3 for Quagga and 4, 5 or 6 for FRRouting.
-	Version uint8 `mapstructure:"version" json:"version,omitempty"`
-	// original -> gobgp:nexthop-trigger-enable
-	// gobgp:nexthop-trigger-enable's original type is boolean.
-	NexthopTriggerEnable bool `mapstructure:"nexthop-trigger-enable" json:"nexthop-trigger-enable,omitempty"`
-	// original -> gobgp:nexthop-trigger-delay
-	NexthopTriggerDelay uint8 `mapstructure:"nexthop-trigger-delay" json:"nexthop-trigger-delay,omitempty"`
-	// original -> gobgp:mpls-label-range-size
-	// Configure MPLS label range size which will be requested to
-	// FRR/Zebra.
-	MplsLabelRangeSize uint32 `mapstructure:"mpls-label-range-size" json:"mpls-label-range-size,omitempty"`
-	// original -> gobgp:software-name
-	// Configure zebra software name.
-	// frr4, cumulus, frr6, frr7, frr7.2 and frr7.3 can be used.
-	SoftwareName string `mapstructure:"software-name" json:"software-name,omitempty"`
-}
-
-func (lhs *ZebraConfig) Equal(rhs *ZebraConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Enabled != rhs.Enabled {
-		return false
-	}
-	if lhs.Url != rhs.Url {
-		return false
-	}
-	if len(lhs.RedistributeRouteTypeList) != len(rhs.RedistributeRouteTypeList) {
-		return false
-	}
-	for idx, l := range lhs.RedistributeRouteTypeList {
-		if l != rhs.RedistributeRouteTypeList[idx] {
-			return false
-		}
-	}
-	if lhs.Version != rhs.Version {
-		return false
-	}
-	if lhs.NexthopTriggerEnable != rhs.NexthopTriggerEnable {
-		return false
-	}
-	if lhs.NexthopTriggerDelay != rhs.NexthopTriggerDelay {
-		return false
-	}
-	if lhs.MplsLabelRangeSize != rhs.MplsLabelRangeSize {
-		return false
-	}
-	if lhs.SoftwareName != rhs.SoftwareName {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:zebra.
-type Zebra struct {
-	// original -> gobgp:zebra-config
-	Config ZebraConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> gobgp:zebra-state
-	State ZebraState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *Zebra) Equal(rhs *Zebra) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:config.
-type MrtConfig struct {
-	// original -> gobgp:dump-type
-	DumpType MrtType `mapstructure:"dump-type" json:"dump-type,omitempty"`
-	// original -> gobgp:file-name
-	// Configures a file name to be written.
-	FileName string `mapstructure:"file-name" json:"file-name,omitempty"`
-	// original -> gobgp:table-name
-	// specify the table name with route server setup.
-	TableName string `mapstructure:"table-name" json:"table-name,omitempty"`
-	// original -> gobgp:dump-interval
-	DumpInterval uint64 `mapstructure:"dump-interval" json:"dump-interval,omitempty"`
-	// original -> gobgp:rotation-interval
-	RotationInterval uint64 `mapstructure:"rotation-interval" json:"rotation-interval,omitempty"`
-}
-
-func (lhs *MrtConfig) Equal(rhs *MrtConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.DumpType != rhs.DumpType {
-		return false
-	}
-	if lhs.FileName != rhs.FileName {
-		return false
-	}
-	if lhs.TableName != rhs.TableName {
-		return false
-	}
-	if lhs.DumpInterval != rhs.DumpInterval {
-		return false
-	}
-	if lhs.RotationInterval != rhs.RotationInterval {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:mrt.
-type Mrt struct {
-	// original -> gobgp:file-name
-	// original -> gobgp:mrt-config
-	Config MrtConfig `mapstructure:"config" json:"config,omitempty"`
-}
-
-func (lhs *Mrt) Equal(rhs *Mrt) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:state.
-// Configured states of VRF.
-type VrfState struct {
-	// original -> gobgp:name
-	// Unique name among all VRF instances.
-	Name string `mapstructure:"name" json:"name,omitempty"`
-	// original -> gobgp:id
-	// Unique identifier among all VRF instances.
-	Id uint32 `mapstructure:"id" json:"id,omitempty"`
-	// original -> gobgp:rd
-	// Route Distinguisher for this VRF.
-	Rd string `mapstructure:"rd" json:"rd,omitempty"`
-	// original -> gobgp:import-rt
-	// List of import Route Targets for this VRF.
-	ImportRtList []string `mapstructure:"import-rt-list" json:"import-rt-list,omitempty"`
-	// original -> gobgp:export-rt
-	// List of export Route Targets for this VRF.
-	ExportRtList []string `mapstructure:"export-rt-list" json:"export-rt-list,omitempty"`
-}
-
-// struct for container gobgp:config.
-// Configuration parameters for VRF.
-type VrfConfig struct {
-	// original -> gobgp:name
-	// Unique name among all VRF instances.
-	Name string `mapstructure:"name" json:"name,omitempty"`
-	// original -> gobgp:id
-	// Unique identifier among all VRF instances.
-	Id uint32 `mapstructure:"id" json:"id,omitempty"`
-	// original -> gobgp:rd
-	// Route Distinguisher for this VRF.
-	Rd string `mapstructure:"rd" json:"rd,omitempty"`
-	// original -> gobgp:import-rt
-	// List of import Route Targets for this VRF.
-	ImportRtList []string `mapstructure:"import-rt-list" json:"import-rt-list,omitempty"`
-	// original -> gobgp:export-rt
-	// List of export Route Targets for this VRF.
-	ExportRtList []string `mapstructure:"export-rt-list" json:"export-rt-list,omitempty"`
-	// original -> gobgp:both-rt
-	// List of both import and export Route Targets for this VRF. Each
-	// configuration for import and export Route Targets will be preferred.
-	BothRtList []string `mapstructure:"both-rt-list" json:"both-rt-list,omitempty"`
-}
-
-func (lhs *VrfConfig) Equal(rhs *VrfConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Name != rhs.Name {
-		return false
-	}
-	if lhs.Id != rhs.Id {
-		return false
-	}
-	if lhs.Rd != rhs.Rd {
-		return false
-	}
-	if len(lhs.ImportRtList) != len(rhs.ImportRtList) {
-		return false
-	}
-	for idx, l := range lhs.ImportRtList {
-		if l != rhs.ImportRtList[idx] {
-			return false
-		}
-	}
-	if len(lhs.ExportRtList) != len(rhs.ExportRtList) {
-		return false
-	}
-	for idx, l := range lhs.ExportRtList {
-		if l != rhs.ExportRtList[idx] {
-			return false
-		}
-	}
-	if len(lhs.BothRtList) != len(rhs.BothRtList) {
-		return false
-	}
-	for idx, l := range lhs.BothRtList {
-		if l != rhs.BothRtList[idx] {
-			return false
-		}
-	}
-	return true
-}
-
-// struct for container gobgp:vrf.
-// VRF instance configurations on the local system.
-type Vrf struct {
-	// original -> gobgp:name
-	// original -> gobgp:vrf-config
-	// Configuration parameters for VRF.
-	Config VrfConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> gobgp:vrf-state
-	// Configured states of VRF.
-	State VrfState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *Vrf) Equal(rhs *Vrf) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:state.
-// Configuration parameters relating to BMP server.
-type BmpServerState struct {
-	// original -> gobgp:address
-	// gobgp:address's original type is inet:ip-address.
-	// Reference to the address of the BMP server used as
-	// a key in the BMP server list.
-	Address string `mapstructure:"address" json:"address,omitempty"`
-	// original -> gobgp:port
-	// Reference to the port of the BMP server.
-	Port uint32 `mapstructure:"port" json:"port,omitempty"`
-	// original -> gobgp:route-monitoring-policy
-	RouteMonitoringPolicy BmpRouteMonitoringPolicyType `mapstructure:"route-monitoring-policy" json:"route-monitoring-policy,omitempty"`
-	// original -> gobgp:statistics-timeout
-	// Interval seconds of statistics messages sent to BMP server.
-	StatisticsTimeout uint16 `mapstructure:"statistics-timeout" json:"statistics-timeout,omitempty"`
-	// original -> gobgp:route-mirroring-enabled
-	// gobgp:route-mirroring-enabled's original type is boolean.
-	// Enable feature for mirroring of received BGP messages
-	// mainly for debugging purpose.
-	RouteMirroringEnabled bool `mapstructure:"route-mirroring-enabled" json:"route-mirroring-enabled,omitempty"`
-	// original -> gobgp:sys-name
-	// Reference to the SysName of the BMP server.
-	SysName string `mapstructure:"sys-name" json:"sys-name,omitempty"`
-	// original -> gobgp:sys-descr
-	// Reference to the SysDescr of the BMP server.
-	SysDescr string `mapstructure:"sys-descr" json:"sys-descr,omitempty"`
-}
-
-// struct for container gobgp:config.
-// Configuration parameters relating to BMP server.
-type BmpServerConfig struct {
-	// original -> gobgp:address
-	// gobgp:address's original type is inet:ip-address.
-	// Reference to the address of the BMP server used as
-	// a key in the BMP server list.
-	Address string `mapstructure:"address" json:"address,omitempty"`
-	// original -> gobgp:port
-	// Reference to the port of the BMP server.
-	Port uint32 `mapstructure:"port" json:"port,omitempty"`
-	// original -> gobgp:route-monitoring-policy
-	RouteMonitoringPolicy BmpRouteMonitoringPolicyType `mapstructure:"route-monitoring-policy" json:"route-monitoring-policy,omitempty"`
-	// original -> gobgp:statistics-timeout
-	// Interval seconds of statistics messages sent to BMP server.
-	StatisticsTimeout uint16 `mapstructure:"statistics-timeout" json:"statistics-timeout,omitempty"`
-	// original -> gobgp:route-mirroring-enabled
-	// gobgp:route-mirroring-enabled's original type is boolean.
-	// Enable feature for mirroring of received BGP messages
-	// mainly for debugging purpose.
-	RouteMirroringEnabled bool `mapstructure:"route-mirroring-enabled" json:"route-mirroring-enabled,omitempty"`
-	// original -> gobgp:sys-name
-	// Reference to the SysName of the BMP server.
-	SysName string `mapstructure:"sys-name" json:"sys-name,omitempty"`
-	// original -> gobgp:sys-descr
-	// Reference to the SysDescr of the BMP server.
-	SysDescr string `mapstructure:"sys-descr" json:"sys-descr,omitempty"`
-}
-
-func (lhs *BmpServerConfig) Equal(rhs *BmpServerConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Address != rhs.Address {
-		return false
-	}
-	if lhs.Port != rhs.Port {
-		return false
-	}
-	if lhs.RouteMonitoringPolicy != rhs.RouteMonitoringPolicy {
-		return false
-	}
-	if lhs.StatisticsTimeout != rhs.StatisticsTimeout {
-		return false
-	}
-	if lhs.RouteMirroringEnabled != rhs.RouteMirroringEnabled {
-		return false
-	}
-	if lhs.SysName != rhs.SysName {
-		return false
-	}
-	if lhs.SysDescr != rhs.SysDescr {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:bmp-server.
-// List of BMP servers configured on the local system.
-type BmpServer struct {
-	// original -> gobgp:address
-	// original -> gobgp:bmp-server-config
-	// Configuration parameters relating to BMP server.
-	Config BmpServerConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> gobgp:bmp-server-state
-	// Configuration parameters relating to BMP server.
-	State BmpServerState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *BmpServer) Equal(rhs *BmpServer) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:rpki-received.
-// Counters for reception RPKI Message types.
-type RpkiReceived struct {
-	// original -> gobgp:serial-notify
-	// Number of serial notify message received from RPKI server.
-	SerialNotify int64 `mapstructure:"serial-notify" json:"serial-notify,omitempty"`
-	// original -> gobgp:cache-reset
-	// Number of cache reset message received from RPKI server.
-	CacheReset int64 `mapstructure:"cache-reset" json:"cache-reset,omitempty"`
-	// original -> gobgp:cache-response
-	// Number of cache response message received from RPKI server.
-	CacheResponse int64 `mapstructure:"cache-response" json:"cache-response,omitempty"`
-	// original -> gobgp:ipv4-prefix
-	// Number of ipv4 prefix message received from RPKI server.
-	Ipv4Prefix int64 `mapstructure:"ipv4-prefix" json:"ipv4-prefix,omitempty"`
-	// original -> gobgp:ipv6-prefix
-	// Number of ipv6 prefix message received from RPKI server.
-	Ipv6Prefix int64 `mapstructure:"ipv6-prefix" json:"ipv6-prefix,omitempty"`
-	// original -> gobgp:end-of-data
-	// Number of end of data message received from RPKI server.
-	EndOfData int64 `mapstructure:"end-of-data" json:"end-of-data,omitempty"`
-	// original -> gobgp:error
-	// Number of error message received from RPKI server.
-	Error int64 `mapstructure:"error" json:"error,omitempty"`
-}
-
-func (lhs *RpkiReceived) Equal(rhs *RpkiReceived) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.SerialNotify != rhs.SerialNotify {
-		return false
-	}
-	if lhs.CacheReset != rhs.CacheReset {
-		return false
-	}
-	if lhs.CacheResponse != rhs.CacheResponse {
-		return false
-	}
-	if lhs.Ipv4Prefix != rhs.Ipv4Prefix {
-		return false
-	}
-	if lhs.Ipv6Prefix != rhs.Ipv6Prefix {
-		return false
-	}
-	if lhs.EndOfData != rhs.EndOfData {
-		return false
-	}
-	if lhs.Error != rhs.Error {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:rpki-sent.
-// Counters for transmission RPKI Message types.
-type RpkiSent struct {
-	// original -> gobgp:serial-query
-	// Number of serial query message sent to RPKI server.
-	SerialQuery int64 `mapstructure:"serial-query" json:"serial-query,omitempty"`
-	// original -> gobgp:reset-query
-	// Number of reset query message sent to RPKI server.
-	ResetQuery int64 `mapstructure:"reset-query" json:"reset-query,omitempty"`
-	// original -> gobgp:error
-	// Number of error message sent to RPKI server.
-	Error int64 `mapstructure:"error" json:"error,omitempty"`
-}
-
-func (lhs *RpkiSent) Equal(rhs *RpkiSent) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.SerialQuery != rhs.SerialQuery {
-		return false
-	}
-	if lhs.ResetQuery != rhs.ResetQuery {
-		return false
-	}
-	if lhs.Error != rhs.Error {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:rpki-messages.
-// Counters for transmission and reception RPKI Message types.
-type RpkiMessages struct {
-	// original -> gobgp:rpki-sent
-	// Counters for transmission RPKI Message types.
-	RpkiSent RpkiSent `mapstructure:"rpki-sent" json:"rpki-sent,omitempty"`
-	// original -> gobgp:rpki-received
-	// Counters for reception RPKI Message types.
-	RpkiReceived RpkiReceived `mapstructure:"rpki-received" json:"rpki-received,omitempty"`
-}
-
-func (lhs *RpkiMessages) Equal(rhs *RpkiMessages) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.RpkiSent.Equal(&(rhs.RpkiSent)) {
-		return false
-	}
-	if !lhs.RpkiReceived.Equal(&(rhs.RpkiReceived)) {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:state.
-// State information relating to RPKI server.
-type RpkiServerState struct {
-	// original -> gobgp:up
-	// gobgp:up's original type is boolean.
-	Up bool `mapstructure:"up" json:"up,omitempty"`
-	// original -> gobgp:serial-number
-	SerialNumber uint32 `mapstructure:"serial-number" json:"serial-number,omitempty"`
-	// original -> gobgp:records-v4
-	RecordsV4 uint32 `mapstructure:"records-v4" json:"records-v4,omitempty"`
-	// original -> gobgp:records-v6
-	RecordsV6 uint32 `mapstructure:"records-v6" json:"records-v6,omitempty"`
-	// original -> gobgp:prefixes-v4
-	PrefixesV4 uint32 `mapstructure:"prefixes-v4" json:"prefixes-v4,omitempty"`
-	// original -> gobgp:prefixes-v6
-	PrefixesV6 uint32 `mapstructure:"prefixes-v6" json:"prefixes-v6,omitempty"`
-	// original -> gobgp:uptime
-	// This timer determines the amount of time since the
-	// RPKI last transitioned in of the Established state.
-	Uptime int64 `mapstructure:"uptime" json:"uptime,omitempty"`
-	// original -> gobgp:downtime
-	// This timer determines the amount of time since the
-	// RPKI last transitioned out of the Established state.
-	Downtime int64 `mapstructure:"downtime" json:"downtime,omitempty"`
-	// original -> gobgp:last-pdu-recv-time
-	// last time the received an pdu message from RPKI server.
-	LastPduRecvTime int64 `mapstructure:"last-pdu-recv-time" json:"last-pdu-recv-time,omitempty"`
-	// original -> gobgp:rpki-messages
-	// Counters for transmission and reception RPKI Message types.
-	RpkiMessages RpkiMessages `mapstructure:"rpki-messages" json:"rpki-messages,omitempty"`
-}
-
-// struct for container gobgp:config.
-// Configuration parameters relating to RPKI server.
-type RpkiServerConfig struct {
-	// original -> gobgp:address
-	// gobgp:address's original type is inet:ip-address.
-	// Reference to the address of the RPKI server used as
-	// a key in the RPKI server list.
-	Address string `mapstructure:"address" json:"address,omitempty"`
-	// original -> gobgp:port
-	// Reference to the port of the RPKI server.
-	Port uint32 `mapstructure:"port" json:"port,omitempty"`
-	// original -> gobgp:refresh-time
-	// Check interval for a configured RPKI server.
-	RefreshTime int64 `mapstructure:"refresh-time" json:"refresh-time,omitempty"`
-	// original -> gobgp:hold-time
-	// Specify the length of time in seconds that the session between
-	// the router and RPKI server is to be considered operational
-	// without any activity.
-	HoldTime int64 `mapstructure:"hold-time" json:"hold-time,omitempty"`
-	// original -> gobgp:record-lifetime
-	// Indicate the expiration date of the route validation recode
-	// received from RPKI server.
-	RecordLifetime int64 `mapstructure:"record-lifetime" json:"record-lifetime,omitempty"`
-	// original -> gobgp:preference
-	// RPKI server has a static preference.
-	// Higher the preference values indicates a higher priority RPKI server.
-	Preference uint8 `mapstructure:"preference" json:"preference,omitempty"`
-}
-
-func (lhs *RpkiServerConfig) Equal(rhs *RpkiServerConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Address != rhs.Address {
-		return false
-	}
-	if lhs.Port != rhs.Port {
-		return false
-	}
-	if lhs.RefreshTime != rhs.RefreshTime {
-		return false
-	}
-	if lhs.HoldTime != rhs.HoldTime {
-		return false
-	}
-	if lhs.RecordLifetime != rhs.RecordLifetime {
-		return false
-	}
-	if lhs.Preference != rhs.Preference {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:rpki-server.
-// List of RPKI servers configured on the local system.
-type RpkiServer struct {
-	// original -> gobgp:address
-	// original -> gobgp:rpki-server-config
-	// Configuration parameters relating to RPKI server.
-	Config RpkiServerConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> gobgp:rpki-server-state
-	// State information relating to RPKI server.
-	State RpkiServerState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *RpkiServer) Equal(rhs *RpkiServer) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp:state.
-// State information relating to the BGP neighbor or group.
-type PeerGroupState struct {
-	// original -> bgp:peer-as
-	// bgp:peer-as's original type is inet:as-number.
-	// AS number of the peer.
-	PeerAs uint32 `mapstructure:"peer-as" json:"peer-as,omitempty"`
-	// original -> bgp:local-as
-	// bgp:local-as's original type is inet:as-number.
-	// The local autonomous system number that is to be used
-	// when establishing sessions with the remote peer or peer
-	// group, if this differs from the global BGP router
-	// autonomous system number.
-	LocalAs uint32 `mapstructure:"local-as" json:"local-as,omitempty"`
-	// original -> bgp:peer-type
-	// Explicitly designate the peer or peer group as internal
-	// (iBGP) or external (eBGP).
-	PeerType PeerType `mapstructure:"peer-type" json:"peer-type,omitempty"`
-	// original -> bgp:auth-password
-	// Configures an MD5 authentication password for use with
-	// neighboring devices.
-	AuthPassword string `mapstructure:"auth-password" json:"auth-password,omitempty"`
-	// original -> bgp:remove-private-as
-	// Remove private AS numbers from updates sent to peers.
-	RemovePrivateAs RemovePrivateAsOption `mapstructure:"remove-private-as" json:"remove-private-as,omitempty"`
-	// original -> bgp:route-flap-damping
-	// bgp:route-flap-damping's original type is boolean.
-	// Enable route flap damping.
-	RouteFlapDamping bool `mapstructure:"route-flap-damping" json:"route-flap-damping,omitempty"`
-	// original -> bgp:send-community
-	// Specify which types of community should be sent to the
-	// neighbor or group. The default is to not send the
-	// community attribute.
-	SendCommunity CommunityType `mapstructure:"send-community" json:"send-community,omitempty"`
-	// original -> bgp:description
-	// An optional textual description (intended primarily for use
-	// with a peer or group.
-	Description string `mapstructure:"description" json:"description,omitempty"`
-	// original -> bgp:peer-group-name
-	// Name of the BGP peer-group.
-	PeerGroupName string `mapstructure:"peer-group-name" json:"peer-group-name,omitempty"`
-	// original -> bgp-op:total-paths
-	// Total number of BGP paths within the context.
-	TotalPaths uint32 `mapstructure:"total-paths" json:"total-paths,omitempty"`
-	// original -> bgp-op:total-prefixes
-	// .
-	TotalPrefixes uint32 `mapstructure:"total-prefixes" json:"total-prefixes,omitempty"`
-}
-
-// struct for container bgp:config.
-// Configuration parameters relating to the BGP neighbor or
-// group.
-type PeerGroupConfig struct {
-	// original -> bgp:peer-as
-	// bgp:peer-as's original type is inet:as-number.
-	// AS number of the peer.
-	PeerAs uint32 `mapstructure:"peer-as" json:"peer-as,omitempty"`
-	// original -> bgp:local-as
-	// bgp:local-as's original type is inet:as-number.
-	// The local autonomous system number that is to be used
-	// when establishing sessions with the remote peer or peer
-	// group, if this differs from the global BGP router
-	// autonomous system number.
-	LocalAs uint32 `mapstructure:"local-as" json:"local-as,omitempty"`
-	// original -> bgp:peer-type
-	// Explicitly designate the peer or peer group as internal
-	// (iBGP) or external (eBGP).
-	PeerType PeerType `mapstructure:"peer-type" json:"peer-type,omitempty"`
-	// original -> bgp:auth-password
-	// Configures an MD5 authentication password for use with
-	// neighboring devices.
-	AuthPassword string `mapstructure:"auth-password" json:"auth-password,omitempty"`
-	// original -> bgp:remove-private-as
-	// Remove private AS numbers from updates sent to peers.
-	RemovePrivateAs RemovePrivateAsOption `mapstructure:"remove-private-as" json:"remove-private-as,omitempty"`
-	// original -> bgp:route-flap-damping
-	// bgp:route-flap-damping's original type is boolean.
-	// Enable route flap damping.
-	RouteFlapDamping bool `mapstructure:"route-flap-damping" json:"route-flap-damping,omitempty"`
-	// original -> bgp:send-community
-	// Specify which types of community should be sent to the
-	// neighbor or group. The default is to not send the
-	// community attribute.
-	SendCommunity CommunityType `mapstructure:"send-community" json:"send-community,omitempty"`
-	// original -> bgp:description
-	// An optional textual description (intended primarily for use
-	// with a peer or group.
-	Description string `mapstructure:"description" json:"description,omitempty"`
-	// original -> bgp:peer-group-name
-	// Name of the BGP peer-group.
-	PeerGroupName string `mapstructure:"peer-group-name" json:"peer-group-name,omitempty"`
-}
-
-func (lhs *PeerGroupConfig) Equal(rhs *PeerGroupConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.PeerAs != rhs.PeerAs {
-		return false
-	}
-	if lhs.LocalAs != rhs.LocalAs {
-		return false
-	}
-	if lhs.PeerType != rhs.PeerType {
-		return false
-	}
-	if lhs.AuthPassword != rhs.AuthPassword {
-		return false
-	}
-	if lhs.RemovePrivateAs != rhs.RemovePrivateAs {
-		return false
-	}
-	if lhs.RouteFlapDamping != rhs.RouteFlapDamping {
-		return false
-	}
-	if lhs.SendCommunity != rhs.SendCommunity {
-		return false
-	}
-	if lhs.Description != rhs.Description {
-		return false
-	}
-	if lhs.PeerGroupName != rhs.PeerGroupName {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp:peer-group.
-// List of BGP peer-groups configured on the local system -
-// uniquely identified by peer-group name.
-type PeerGroup struct {
-	// original -> bgp:peer-group-name
-	// original -> bgp:peer-group-config
-	// Configuration parameters relating to the BGP neighbor or
-	// group.
-	Config PeerGroupConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> bgp:peer-group-state
-	// State information relating to the BGP neighbor or group.
-	State PeerGroupState `mapstructure:"state" json:"state,omitempty"`
-	// original -> bgp:timers
-	// Timers related to a BGP neighbor or group.
-	Timers Timers `mapstructure:"timers" json:"timers,omitempty"`
-	// original -> bgp:transport
-	// Transport session parameters for the BGP neighbor or group.
-	Transport Transport `mapstructure:"transport" json:"transport,omitempty"`
-	// original -> bgp:error-handling
-	// Error handling parameters used for the BGP neighbor or
-	// group.
-	ErrorHandling ErrorHandling `mapstructure:"error-handling" json:"error-handling,omitempty"`
-	// original -> bgp:logging-options
-	// Logging options for events related to the BGP neighbor or
-	// group.
-	LoggingOptions LoggingOptions `mapstructure:"logging-options" json:"logging-options,omitempty"`
-	// original -> bgp:ebgp-multihop
-	// eBGP multi-hop parameters for the BGP neighbor or group.
-	EbgpMultihop EbgpMultihop `mapstructure:"ebgp-multihop" json:"ebgp-multihop,omitempty"`
-	// original -> bgp:route-reflector
-	// Route reflector parameters for the BGP neighbor or group.
-	RouteReflector RouteReflector `mapstructure:"route-reflector" json:"route-reflector,omitempty"`
-	// original -> bgp:as-path-options
-	// AS_PATH manipulation parameters for the BGP neighbor or
-	// group.
-	AsPathOptions AsPathOptions `mapstructure:"as-path-options" json:"as-path-options,omitempty"`
-	// original -> bgp:add-paths
-	// Parameters relating to the advertisement and receipt of
-	// multiple paths for a single NLRI (add-paths).
-	AddPaths AddPaths `mapstructure:"add-paths" json:"add-paths,omitempty"`
-	// original -> bgp:afi-safis
-	// Per-address-family configuration parameters associated with
-	// the neighbor or group.
-	AfiSafis []AfiSafi `mapstructure:"afi-safis" json:"afi-safis,omitempty"`
-	// original -> bgp:graceful-restart
-	// Parameters relating the graceful restart mechanism for BGP.
-	GracefulRestart GracefulRestart `mapstructure:"graceful-restart" json:"graceful-restart,omitempty"`
-	// original -> rpol:apply-policy
-	// Anchor point for routing policies in the model.
-	// Import and export policies are with respect to the local
-	// routing table, i.e., export (send) and import (receive),
-	// depending on the context.
-	ApplyPolicy ApplyPolicy `mapstructure:"apply-policy" json:"apply-policy,omitempty"`
-	// original -> bgp-mp:use-multiple-paths
-	// Parameters related to the use of multiple paths for the
-	// same NLRI.
-	UseMultiplePaths UseMultiplePaths `mapstructure:"use-multiple-paths" json:"use-multiple-paths,omitempty"`
-	// original -> gobgp:route-server
-	// Configure the local router as a route server.
-	RouteServer RouteServer `mapstructure:"route-server" json:"route-server,omitempty"`
-	// original -> gobgp:ttl-security
-	// Configure TTL Security feature.
-	TtlSecurity TtlSecurity `mapstructure:"ttl-security" json:"ttl-security,omitempty"`
-}
-
-func (lhs *PeerGroup) Equal(rhs *PeerGroup) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	if !lhs.Timers.Equal(&(rhs.Timers)) {
-		return false
-	}
-	if !lhs.Transport.Equal(&(rhs.Transport)) {
-		return false
-	}
-	if !lhs.ErrorHandling.Equal(&(rhs.ErrorHandling)) {
-		return false
-	}
-	if !lhs.LoggingOptions.Equal(&(rhs.LoggingOptions)) {
-		return false
-	}
-	if !lhs.EbgpMultihop.Equal(&(rhs.EbgpMultihop)) {
-		return false
-	}
-	if !lhs.RouteReflector.Equal(&(rhs.RouteReflector)) {
-		return false
-	}
-	if !lhs.AsPathOptions.Equal(&(rhs.AsPathOptions)) {
-		return false
-	}
-	if !lhs.AddPaths.Equal(&(rhs.AddPaths)) {
-		return false
-	}
-	if len(lhs.AfiSafis) != len(rhs.AfiSafis) {
-		return false
-	}
-	{
-		lmap := make(map[string]*AfiSafi)
-		for i, l := range lhs.AfiSafis {
-			lmap[mapkey(i, string(l.Config.AfiSafiName))] = &lhs.AfiSafis[i]
-		}
-		for i, r := range rhs.AfiSafis {
-			if l, y := lmap[mapkey(i, string(r.Config.AfiSafiName))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if !lhs.GracefulRestart.Equal(&(rhs.GracefulRestart)) {
-		return false
-	}
-	if !lhs.ApplyPolicy.Equal(&(rhs.ApplyPolicy)) {
-		return false
-	}
-	if !lhs.UseMultiplePaths.Equal(&(rhs.UseMultiplePaths)) {
-		return false
-	}
-	if !lhs.RouteServer.Equal(&(rhs.RouteServer)) {
-		return false
-	}
-	if !lhs.TtlSecurity.Equal(&(rhs.TtlSecurity)) {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:state.
-// State information for TTL Security.
-type TtlSecurityState struct {
-	// original -> gobgp:enabled
-	// gobgp:enabled's original type is boolean.
-	// Enable features for TTL Security.
-	Enabled bool `mapstructure:"enabled" json:"enabled,omitempty"`
-	// original -> gobgp:ttl-min
-	// Reference to the port of the BMP server.
-	TtlMin uint8 `mapstructure:"ttl-min" json:"ttl-min,omitempty"`
-}
-
 // struct for container gobgp:config.
 // Configuration parameters for TTL Security.
 type TtlSecurityConfig struct {
@@ -2026,74 +418,6 @@ type TtlSecurity struct {
 }
 
 func (lhs *TtlSecurity) Equal(rhs *TtlSecurity) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:state.
-// State information relating to route server
-// client(s) used for the BGP neighbor.
-type RouteServerState struct {
-	// original -> gobgp:route-server-client
-	// gobgp:route-server-client's original type is boolean.
-	// Configure the neighbor as a route server client.
-	RouteServerClient bool `mapstructure:"route-server-client" json:"route-server-client,omitempty"`
-	// original -> gobgp:secondary-route
-	// gobgp:secondary-route's original type is boolean.
-	// if an export policy rejects a selected route, try the next route in
-	// order until one that is accepted is found or all routes for the peer
-	// are rejected.
-	SecondaryRoute bool `mapstructure:"secondary-route" json:"secondary-route,omitempty"`
-}
-
-// struct for container gobgp:config.
-// Configuration parameters relating to route server
-// client(s) used for the BGP neighbor.
-type RouteServerConfig struct {
-	// original -> gobgp:route-server-client
-	// gobgp:route-server-client's original type is boolean.
-	// Configure the neighbor as a route server client.
-	RouteServerClient bool `mapstructure:"route-server-client" json:"route-server-client,omitempty"`
-	// original -> gobgp:secondary-route
-	// gobgp:secondary-route's original type is boolean.
-	// if an export policy rejects a selected route, try the next route in
-	// order until one that is accepted is found or all routes for the peer
-	// are rejected.
-	SecondaryRoute bool `mapstructure:"secondary-route" json:"secondary-route,omitempty"`
-}
-
-func (lhs *RouteServerConfig) Equal(rhs *RouteServerConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.RouteServerClient != rhs.RouteServerClient {
-		return false
-	}
-	if lhs.SecondaryRoute != rhs.SecondaryRoute {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:route-server.
-// Configure the local router as a route server.
-type RouteServer struct {
-	// original -> gobgp:route-server-config
-	// Configuration parameters relating to route server
-	// client(s) used for the BGP neighbor.
-	Config RouteServerConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> gobgp:route-server-state
-	// State information relating to route server
-	// client(s) used for the BGP neighbor.
-	State RouteServerState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *RouteServer) Equal(rhs *RouteServer) bool {
 	if lhs == nil || rhs == nil {
 		return false
 	}
@@ -2255,74 +579,6 @@ type AsPathOptions struct {
 }
 
 func (lhs *AsPathOptions) Equal(rhs *AsPathOptions) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp:state.
-// State information relating to route reflection for the
-// BGP neighbor or group.
-type RouteReflectorState struct {
-	// original -> bgp:route-reflector-cluster-id
-	// route-reflector cluster id to use when local router is
-	// configured as a route reflector.  Commonly set at the group
-	// level, but allows a different cluster
-	// id to be set for each neighbor.
-	RouteReflectorClusterId RrClusterIdType `mapstructure:"route-reflector-cluster-id" json:"route-reflector-cluster-id,omitempty"`
-	// original -> bgp:route-reflector-client
-	// bgp:route-reflector-client's original type is boolean.
-	// Configure the neighbor as a route reflector client.
-	RouteReflectorClient bool `mapstructure:"route-reflector-client" json:"route-reflector-client,omitempty"`
-}
-
-// struct for container bgp:config.
-// Configuraton parameters relating to route reflection
-// for the BGP neighbor or group.
-type RouteReflectorConfig struct {
-	// original -> bgp:route-reflector-cluster-id
-	// route-reflector cluster id to use when local router is
-	// configured as a route reflector.  Commonly set at the group
-	// level, but allows a different cluster
-	// id to be set for each neighbor.
-	RouteReflectorClusterId RrClusterIdType `mapstructure:"route-reflector-cluster-id" json:"route-reflector-cluster-id,omitempty"`
-	// original -> bgp:route-reflector-client
-	// bgp:route-reflector-client's original type is boolean.
-	// Configure the neighbor as a route reflector client.
-	RouteReflectorClient bool `mapstructure:"route-reflector-client" json:"route-reflector-client,omitempty"`
-}
-
-func (lhs *RouteReflectorConfig) Equal(rhs *RouteReflectorConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.RouteReflectorClusterId != rhs.RouteReflectorClusterId {
-		return false
-	}
-	if lhs.RouteReflectorClient != rhs.RouteReflectorClient {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp:route-reflector.
-// Route reflector parameters for the BGP neighbor or group.
-type RouteReflector struct {
-	// original -> bgp:route-reflector-config
-	// Configuraton parameters relating to route reflection
-	// for the BGP neighbor or group.
-	Config RouteReflectorConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> bgp:route-reflector-state
-	// State information relating to route reflection for the
-	// BGP neighbor or group.
-	State RouteReflectorState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *RouteReflector) Equal(rhs *RouteReflector) bool {
 	if lhs == nil || rhs == nil {
 		return false
 	}
@@ -2795,37 +1051,6 @@ func (lhs *Timers) Equal(rhs *Timers) bool {
 	return true
 }
 
-// struct for container gobgp:adj-table.
-type AdjTable struct {
-	// original -> gobgp:ADVERTISED
-	Advertised uint32 `mapstructure:"advertised" json:"advertised,omitempty"`
-	// original -> gobgp:FILTERED
-	Filtered uint32 `mapstructure:"filtered" json:"filtered,omitempty"`
-	// original -> gobgp:RECEIVED
-	Received uint32 `mapstructure:"received" json:"received,omitempty"`
-	// original -> gobgp:ACCEPTED
-	Accepted uint32 `mapstructure:"accepted" json:"accepted,omitempty"`
-}
-
-func (lhs *AdjTable) Equal(rhs *AdjTable) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Advertised != rhs.Advertised {
-		return false
-	}
-	if lhs.Filtered != rhs.Filtered {
-		return false
-	}
-	if lhs.Received != rhs.Received {
-		return false
-	}
-	if lhs.Accepted != rhs.Accepted {
-		return false
-	}
-	return true
-}
-
 // struct for container bgp:queues.
 // Counters related to queued messages associated with the
 // BGP neighbor.
@@ -3039,7 +1264,7 @@ func (lhs *Messages) Equal(rhs *Messages) bool {
 
 // struct for container bgp:state.
 // State information relating to the BGP neighbor or group.
-type NeighborState struct {
+type PeerState struct {
 	// original -> bgp:peer-as
 	// bgp:peer-as's original type is inet:as-number.
 	// AS number of the peer.
@@ -3075,13 +1300,10 @@ type NeighborState struct {
 	// An optional textual description (intended primarily for use
 	// with a peer or group.
 	Description string `mapstructure:"description" json:"description,omitempty"`
-	// original -> bgp:peer-group
-	// The peer-group with which this neighbor is associated.
-	PeerGroup string `mapstructure:"peer-group" json:"peer-group,omitempty"`
 	// original -> bgp:neighbor-address
 	// bgp:neighbor-address's original type is inet:ip-address.
 	// Address of the BGP peer, either in IPv4 or IPv6.
-	NeighborAddress string `mapstructure:"neighbor-address" json:"neighbor-address,omitempty"`
+	PeerAddress string `mapstructure:"peer-address" json:"peer-address,omitempty"`
 	// original -> bgp-op:session-state
 	// Operational state of the BGP peer.
 	SessionState SessionState `mapstructure:"session-state" json:"session-state,omitempty"`
@@ -3096,23 +1318,12 @@ type NeighborState struct {
 	// Counters related to queued messages associated with the
 	// BGP neighbor.
 	Queues Queues `mapstructure:"queues" json:"queues,omitempty"`
-	// original -> gobgp:adj-table
-	AdjTable AdjTable `mapstructure:"adj-table" json:"adj-table,omitempty"`
 	// original -> gobgp:remote-capability
 	// original type is list of bgp-capability
 	RemoteCapabilityList []bgp.ParameterCapabilityInterface `mapstructure:"remote-capability-list" json:"remote-capability-list,omitempty"`
 	// original -> gobgp:local-capability
 	// original type is list of bgp-capability
 	LocalCapabilityList []bgp.ParameterCapabilityInterface `mapstructure:"local-capability-list" json:"local-capability-list,omitempty"`
-	// original -> gobgp:received-open-message
-	// gobgp:received-open-message's original type is bgp-open-message.
-	ReceivedOpenMessage *bgp.BGPMessage `mapstructure:"received-open-message" json:"received-open-message,omitempty"`
-	// original -> gobgp:admin-down
-	// gobgp:admin-down's original type is boolean.
-	// The state of administrative operation. If the state is true, it indicates the neighbor is disabled by the administrator.
-	AdminDown bool `mapstructure:"admin-down" json:"admin-down,omitempty"`
-	// original -> gobgp:admin-state
-	AdminState AdminState `mapstructure:"admin-state" json:"admin-state,omitempty"`
 	// original -> gobgp:established-count
 	// The number of how many the peer became established state.
 	EstablishedCount uint32 `mapstructure:"established-count" json:"established-count,omitempty"`
@@ -3120,7 +1331,7 @@ type NeighborState struct {
 	// The number of flip-flops.
 	Flops uint32 `mapstructure:"flops" json:"flops,omitempty"`
 	// original -> gobgp:neighbor-interface
-	NeighborInterface string `mapstructure:"neighbor-interface" json:"neighbor-interface,omitempty"`
+	PeerInterface string `mapstructure:"peer-interface" json:"peer-interface,omitempty"`
 	// original -> gobgp:vrf
 	Vrf string `mapstructure:"vrf" json:"vrf,omitempty"`
 	// original -> gobgp:remote-router-id
@@ -3130,7 +1341,7 @@ type NeighborState struct {
 // struct for container bgp:config.
 // Configuration parameters relating to the BGP neighbor or
 // group.
-type NeighborConfig struct {
+type PeerConfig struct {
 	// original -> bgp:peer-as
 	// bgp:peer-as's original type is inet:as-number.
 	// AS number of the peer.
@@ -3166,24 +1377,17 @@ type NeighborConfig struct {
 	// An optional textual description (intended primarily for use
 	// with a peer or group.
 	Description string `mapstructure:"description" json:"description,omitempty"`
-	// original -> bgp:peer-group
-	// The peer-group with which this neighbor is associated.
-	PeerGroup string `mapstructure:"peer-group" json:"peer-group,omitempty"`
 	// original -> bgp:neighbor-address
 	// bgp:neighbor-address's original type is inet:ip-address.
 	// Address of the BGP peer, either in IPv4 or IPv6.
-	NeighborAddress string `mapstructure:"neighbor-address" json:"neighbor-address,omitempty"`
-	// original -> gobgp:admin-down
-	// gobgp:admin-down's original type is boolean.
-	// The config of administrative operation. If state, indicates the neighbor is disabled by the administrator.
-	AdminDown bool `mapstructure:"admin-down" json:"admin-down,omitempty"`
+	PeerAddress string `mapstructure:"peer-address" json:"peer-address,omitempty"`
 	// original -> gobgp:neighbor-interface
-	NeighborInterface string `mapstructure:"neighbor-interface" json:"neighbor-interface,omitempty"`
+	PeerInterface string `mapstructure:"peer-interface" json:"peer-interface,omitempty"`
 	// original -> gobgp:vrf
 	Vrf string `mapstructure:"vrf" json:"vrf,omitempty"`
 }
 
-func (lhs *NeighborConfig) Equal(rhs *NeighborConfig) bool {
+func (lhs *PeerConfig) Equal(rhs *PeerConfig) bool {
 	if lhs == nil || rhs == nil {
 		return false
 	}
@@ -3211,16 +1415,10 @@ func (lhs *NeighborConfig) Equal(rhs *NeighborConfig) bool {
 	if lhs.Description != rhs.Description {
 		return false
 	}
-	if lhs.PeerGroup != rhs.PeerGroup {
+	if lhs.PeerAddress != rhs.PeerAddress {
 		return false
 	}
-	if lhs.NeighborAddress != rhs.NeighborAddress {
-		return false
-	}
-	if lhs.AdminDown != rhs.AdminDown {
-		return false
-	}
-	if lhs.NeighborInterface != rhs.NeighborInterface {
+	if lhs.PeerInterface != rhs.PeerInterface {
 		return false
 	}
 	if lhs.Vrf != rhs.Vrf {
@@ -3232,15 +1430,15 @@ func (lhs *NeighborConfig) Equal(rhs *NeighborConfig) bool {
 // struct for container bgp:neighbor.
 // List of BGP neighbors configured on the local system,
 // uniquely identified by peer IPv[46] address.
-type Neighbor struct {
+type Peer struct {
 	// original -> bgp:neighbor-address
 	// original -> bgp:neighbor-config
 	// Configuration parameters relating to the BGP neighbor or
 	// group.
-	Config NeighborConfig `mapstructure:"config" json:"config,omitempty"`
+	Config PeerConfig `mapstructure:"config" json:"config,omitempty"`
 	// original -> bgp:neighbor-state
 	// State information relating to the BGP neighbor or group.
-	State NeighborState `mapstructure:"state" json:"state,omitempty"`
+	State PeerState `mapstructure:"state" json:"state,omitempty"`
 	// original -> bgp:timers
 	// Timers related to a BGP neighbor or group.
 	Timers Timers `mapstructure:"timers" json:"timers,omitempty"`
@@ -3258,9 +1456,6 @@ type Neighbor struct {
 	// original -> bgp:ebgp-multihop
 	// eBGP multi-hop parameters for the BGP neighbor or group.
 	EbgpMultihop EbgpMultihop `mapstructure:"ebgp-multihop" json:"ebgp-multihop,omitempty"`
-	// original -> bgp:route-reflector
-	// Route reflector parameters for the BGP neighbor or group.
-	RouteReflector RouteReflector `mapstructure:"route-reflector" json:"route-reflector,omitempty"`
 	// original -> bgp:as-path-options
 	// AS_PATH manipulation parameters for the BGP neighbor or
 	// group.
@@ -3273,28 +1468,18 @@ type Neighbor struct {
 	// Per-address-family configuration parameters associated with
 	// the neighbor or group.
 	AfiSafis []AfiSafi `mapstructure:"afi-safis" json:"afi-safis,omitempty"`
-	// original -> bgp:graceful-restart
-	// Parameters relating the graceful restart mechanism for BGP.
-	GracefulRestart GracefulRestart `mapstructure:"graceful-restart" json:"graceful-restart,omitempty"`
-	// original -> rpol:apply-policy
-	// Anchor point for routing policies in the model.
-	// Import and export policies are with respect to the local
-	// routing table, i.e., export (send) and import (receive),
-	// depending on the context.
-	ApplyPolicy ApplyPolicy `mapstructure:"apply-policy" json:"apply-policy,omitempty"`
 	// original -> bgp-mp:use-multiple-paths
 	// Parameters related to the use of multiple-paths for the same
 	// NLRI when they are received only from this neighbor.
 	UseMultiplePaths UseMultiplePaths `mapstructure:"use-multiple-paths" json:"use-multiple-paths,omitempty"`
-	// original -> gobgp:route-server
-	// Configure the local router as a route server.
-	RouteServer RouteServer `mapstructure:"route-server" json:"route-server,omitempty"`
 	// original -> gobgp:ttl-security
 	// Configure TTL Security feature.
 	TtlSecurity TtlSecurity `mapstructure:"ttl-security" json:"ttl-security,omitempty"`
+	// XRDP
+	RDPEnabled bool `mapstructure:"rdp-enabled" jason:"rdp-enabled,omitempty"`
 }
 
-func (lhs *Neighbor) Equal(rhs *Neighbor) bool {
+func (lhs *Peer) Equal(rhs *Peer) bool {
 	if lhs == nil || rhs == nil {
 		return false
 	}
@@ -3314,9 +1499,6 @@ func (lhs *Neighbor) Equal(rhs *Neighbor) bool {
 		return false
 	}
 	if !lhs.EbgpMultihop.Equal(&(rhs.EbgpMultihop)) {
-		return false
-	}
-	if !lhs.RouteReflector.Equal(&(rhs.RouteReflector)) {
 		return false
 	}
 	if !lhs.AsPathOptions.Equal(&(rhs.AsPathOptions)) {
@@ -3341,77 +1523,13 @@ func (lhs *Neighbor) Equal(rhs *Neighbor) bool {
 			}
 		}
 	}
-	if !lhs.GracefulRestart.Equal(&(rhs.GracefulRestart)) {
-		return false
-	}
-	if !lhs.ApplyPolicy.Equal(&(rhs.ApplyPolicy)) {
-		return false
-	}
 	if !lhs.UseMultiplePaths.Equal(&(rhs.UseMultiplePaths)) {
-		return false
-	}
-	if !lhs.RouteServer.Equal(&(rhs.RouteServer)) {
 		return false
 	}
 	if !lhs.TtlSecurity.Equal(&(rhs.TtlSecurity)) {
 		return false
 	}
-	return true
-}
-
-// struct for container gobgp:state.
-type LongLivedGracefulRestartState struct {
-	// original -> gobgp:enabled
-	// gobgp:enabled's original type is boolean.
-	Enabled bool `mapstructure:"enabled" json:"enabled,omitempty"`
-	// original -> gobgp:received
-	// gobgp:received's original type is boolean.
-	Received bool `mapstructure:"received" json:"received,omitempty"`
-	// original -> gobgp:advertised
-	// gobgp:advertised's original type is boolean.
-	Advertised bool `mapstructure:"advertised" json:"advertised,omitempty"`
-	// original -> gobgp:peer-restart-time
-	PeerRestartTime uint32 `mapstructure:"peer-restart-time" json:"peer-restart-time,omitempty"`
-	// original -> gobgp:peer-restart-timer-expired
-	// gobgp:peer-restart-timer-expired's original type is boolean.
-	PeerRestartTimerExpired bool `mapstructure:"peer-restart-timer-expired" json:"peer-restart-timer-expired,omitempty"`
-}
-
-// struct for container gobgp:config.
-type LongLivedGracefulRestartConfig struct {
-	// original -> gobgp:enabled
-	// gobgp:enabled's original type is boolean.
-	Enabled bool `mapstructure:"enabled" json:"enabled,omitempty"`
-	// original -> gobgp:restart-time
-	RestartTime uint32 `mapstructure:"restart-time" json:"restart-time,omitempty"`
-}
-
-func (lhs *LongLivedGracefulRestartConfig) Equal(rhs *LongLivedGracefulRestartConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Enabled != rhs.Enabled {
-		return false
-	}
-	if lhs.RestartTime != rhs.RestartTime {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:long-lived-graceful-restart.
-type LongLivedGracefulRestart struct {
-	// original -> gobgp:long-lived-graceful-restart-config
-	Config LongLivedGracefulRestartConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> gobgp:long-lived-graceful-restart-state
-	State LongLivedGracefulRestartState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *LongLivedGracefulRestart) Equal(rhs *LongLivedGracefulRestart) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
+	if lhs.RDPEnabled != rhs.RDPEnabled {
 		return false
 	}
 	return true
@@ -3460,17 +1578,10 @@ func (lhs *RouteTargetMembership) Equal(rhs *RouteTargetMembership) bool {
 // struct for container bgp-mp:l2vpn-evpn.
 // BGP EVPN configuration options.
 type L2vpnEvpn struct {
-	// original -> bgp-mp:prefix-limit
-	// Configure the maximum number of prefixes that will be
-	// accepted from a peer.
-	PrefixLimit PrefixLimit `mapstructure:"prefix-limit" json:"prefix-limit,omitempty"`
 }
 
 func (lhs *L2vpnEvpn) Equal(rhs *L2vpnEvpn) bool {
 	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.PrefixLimit.Equal(&(rhs.PrefixLimit)) {
 		return false
 	}
 	return true
@@ -3479,17 +1590,10 @@ func (lhs *L2vpnEvpn) Equal(rhs *L2vpnEvpn) bool {
 // struct for container bgp-mp:l2vpn-vpls.
 // BGP-signalled VPLS configuration options.
 type L2vpnVpls struct {
-	// original -> bgp-mp:prefix-limit
-	// Configure the maximum number of prefixes that will be
-	// accepted from a peer.
-	PrefixLimit PrefixLimit `mapstructure:"prefix-limit" json:"prefix-limit,omitempty"`
 }
 
 func (lhs *L2vpnVpls) Equal(rhs *L2vpnVpls) bool {
 	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.PrefixLimit.Equal(&(rhs.PrefixLimit)) {
 		return false
 	}
 	return true
@@ -3498,17 +1602,10 @@ func (lhs *L2vpnVpls) Equal(rhs *L2vpnVpls) bool {
 // struct for container bgp-mp:l3vpn-ipv6-multicast.
 // Multicast IPv6 L3VPN configuration options.
 type L3vpnIpv6Multicast struct {
-	// original -> bgp-mp:prefix-limit
-	// Configure the maximum number of prefixes that will be
-	// accepted from a peer.
-	PrefixLimit PrefixLimit `mapstructure:"prefix-limit" json:"prefix-limit,omitempty"`
 }
 
 func (lhs *L3vpnIpv6Multicast) Equal(rhs *L3vpnIpv6Multicast) bool {
 	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.PrefixLimit.Equal(&(rhs.PrefixLimit)) {
 		return false
 	}
 	return true
@@ -3517,17 +1614,10 @@ func (lhs *L3vpnIpv6Multicast) Equal(rhs *L3vpnIpv6Multicast) bool {
 // struct for container bgp-mp:l3vpn-ipv4-multicast.
 // Multicast IPv4 L3VPN configuration options.
 type L3vpnIpv4Multicast struct {
-	// original -> bgp-mp:prefix-limit
-	// Configure the maximum number of prefixes that will be
-	// accepted from a peer.
-	PrefixLimit PrefixLimit `mapstructure:"prefix-limit" json:"prefix-limit,omitempty"`
 }
 
 func (lhs *L3vpnIpv4Multicast) Equal(rhs *L3vpnIpv4Multicast) bool {
 	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.PrefixLimit.Equal(&(rhs.PrefixLimit)) {
 		return false
 	}
 	return true
@@ -3536,17 +1626,10 @@ func (lhs *L3vpnIpv4Multicast) Equal(rhs *L3vpnIpv4Multicast) bool {
 // struct for container bgp-mp:l3vpn-ipv6-unicast.
 // Unicast IPv6 L3VPN configuration options.
 type L3vpnIpv6Unicast struct {
-	// original -> bgp-mp:prefix-limit
-	// Configure the maximum number of prefixes that will be
-	// accepted from a peer.
-	PrefixLimit PrefixLimit `mapstructure:"prefix-limit" json:"prefix-limit,omitempty"`
 }
 
 func (lhs *L3vpnIpv6Unicast) Equal(rhs *L3vpnIpv6Unicast) bool {
 	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.PrefixLimit.Equal(&(rhs.PrefixLimit)) {
 		return false
 	}
 	return true
@@ -3555,17 +1638,10 @@ func (lhs *L3vpnIpv6Unicast) Equal(rhs *L3vpnIpv6Unicast) bool {
 // struct for container bgp-mp:l3vpn-ipv4-unicast.
 // Unicast IPv4 L3VPN configuration options.
 type L3vpnIpv4Unicast struct {
-	// original -> bgp-mp:prefix-limit
-	// Configure the maximum number of prefixes that will be
-	// accepted from a peer.
-	PrefixLimit PrefixLimit `mapstructure:"prefix-limit" json:"prefix-limit,omitempty"`
 }
 
 func (lhs *L3vpnIpv4Unicast) Equal(rhs *L3vpnIpv4Unicast) bool {
 	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.PrefixLimit.Equal(&(rhs.PrefixLimit)) {
 		return false
 	}
 	return true
@@ -3574,17 +1650,10 @@ func (lhs *L3vpnIpv4Unicast) Equal(rhs *L3vpnIpv4Unicast) bool {
 // struct for container bgp-mp:ipv6-labelled-unicast.
 // IPv6 Labelled Unicast configuration options.
 type Ipv6LabelledUnicast struct {
-	// original -> bgp-mp:prefix-limit
-	// Configure the maximum number of prefixes that will be
-	// accepted from a peer.
-	PrefixLimit PrefixLimit `mapstructure:"prefix-limit" json:"prefix-limit,omitempty"`
 }
 
 func (lhs *Ipv6LabelledUnicast) Equal(rhs *Ipv6LabelledUnicast) bool {
 	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.PrefixLimit.Equal(&(rhs.PrefixLimit)) {
 		return false
 	}
 	return true
@@ -3593,17 +1662,10 @@ func (lhs *Ipv6LabelledUnicast) Equal(rhs *Ipv6LabelledUnicast) bool {
 // struct for container bgp-mp:ipv4-labelled-unicast.
 // IPv4 Labelled Unicast configuration options.
 type Ipv4LabelledUnicast struct {
-	// original -> bgp-mp:prefix-limit
-	// Configure the maximum number of prefixes that will be
-	// accepted from a peer.
-	PrefixLimit PrefixLimit `mapstructure:"prefix-limit" json:"prefix-limit,omitempty"`
 }
 
 func (lhs *Ipv4LabelledUnicast) Equal(rhs *Ipv4LabelledUnicast) bool {
 	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.PrefixLimit.Equal(&(rhs.PrefixLimit)) {
 		return false
 	}
 	return true
@@ -3642,10 +1704,6 @@ func (lhs *Ipv6UnicastConfig) Equal(rhs *Ipv6UnicastConfig) bool {
 // struct for container bgp-mp:ipv6-unicast.
 // IPv6 unicast configuration options.
 type Ipv6Unicast struct {
-	// original -> bgp-mp:prefix-limit
-	// Configure the maximum number of prefixes that will be
-	// accepted from a peer.
-	PrefixLimit PrefixLimit `mapstructure:"prefix-limit" json:"prefix-limit,omitempty"`
 	// original -> bgp-mp:ipv6-unicast-config
 	// Configuration parameters for common IPv4 and IPv6 unicast
 	// AFI-SAFI options.
@@ -3658,9 +1716,6 @@ type Ipv6Unicast struct {
 
 func (lhs *Ipv6Unicast) Equal(rhs *Ipv6Unicast) bool {
 	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.PrefixLimit.Equal(&(rhs.PrefixLimit)) {
 		return false
 	}
 	if !lhs.Config.Equal(&(rhs.Config)) {
@@ -3699,97 +1754,9 @@ func (lhs *Ipv4UnicastConfig) Equal(rhs *Ipv4UnicastConfig) bool {
 	return true
 }
 
-// struct for container bgp-mp:state.
-// State information relating to the prefix-limit for the
-// AFI-SAFI.
-type PrefixLimitState struct {
-	// original -> bgp-mp:max-prefixes
-	// Maximum number of prefixes that will be accepted
-	// from the neighbour.
-	MaxPrefixes uint32 `mapstructure:"max-prefixes" json:"max-prefixes,omitempty"`
-	// original -> bgp-mp:shutdown-threshold-pct
-	// Threshold on number of prefixes that can be received
-	// from a neighbour before generation of warning messages
-	// or log entries. Expressed as a percentage of
-	// max-prefixes.
-	ShutdownThresholdPct Percentage `mapstructure:"shutdown-threshold-pct" json:"shutdown-threshold-pct,omitempty"`
-	// original -> bgp-mp:restart-timer
-	// bgp-mp:restart-timer's original type is decimal64.
-	// Time interval in seconds after which the BGP session
-	// is re-established after being torn down due to exceeding
-	// the max-prefix limit.
-	RestartTimer float64 `mapstructure:"restart-timer" json:"restart-timer,omitempty"`
-}
-
-// struct for container bgp-mp:config.
-// Configuration parameters relating to the prefix
-// limit for the AFI-SAFI.
-type PrefixLimitConfig struct {
-	// original -> bgp-mp:max-prefixes
-	// Maximum number of prefixes that will be accepted
-	// from the neighbour.
-	MaxPrefixes uint32 `mapstructure:"max-prefixes" json:"max-prefixes,omitempty"`
-	// original -> bgp-mp:shutdown-threshold-pct
-	// Threshold on number of prefixes that can be received
-	// from a neighbour before generation of warning messages
-	// or log entries. Expressed as a percentage of
-	// max-prefixes.
-	ShutdownThresholdPct Percentage `mapstructure:"shutdown-threshold-pct" json:"shutdown-threshold-pct,omitempty"`
-	// original -> bgp-mp:restart-timer
-	// bgp-mp:restart-timer's original type is decimal64.
-	// Time interval in seconds after which the BGP session
-	// is re-established after being torn down due to exceeding
-	// the max-prefix limit.
-	RestartTimer float64 `mapstructure:"restart-timer" json:"restart-timer,omitempty"`
-}
-
-func (lhs *PrefixLimitConfig) Equal(rhs *PrefixLimitConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.MaxPrefixes != rhs.MaxPrefixes {
-		return false
-	}
-	if lhs.ShutdownThresholdPct != rhs.ShutdownThresholdPct {
-		return false
-	}
-	if lhs.RestartTimer != rhs.RestartTimer {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-mp:prefix-limit.
-// Configure the maximum number of prefixes that will be
-// accepted from a peer.
-type PrefixLimit struct {
-	// original -> bgp-mp:prefix-limit-config
-	// Configuration parameters relating to the prefix
-	// limit for the AFI-SAFI.
-	Config PrefixLimitConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> bgp-mp:prefix-limit-state
-	// State information relating to the prefix-limit for the
-	// AFI-SAFI.
-	State PrefixLimitState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *PrefixLimit) Equal(rhs *PrefixLimit) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
 // struct for container bgp-mp:ipv4-unicast.
 // IPv4 unicast configuration options.
 type Ipv4Unicast struct {
-	// original -> bgp-mp:prefix-limit
-	// Configure the maximum number of prefixes that will be
-	// accepted from a peer.
-	PrefixLimit PrefixLimit `mapstructure:"prefix-limit" json:"prefix-limit,omitempty"`
 	// original -> bgp-mp:ipv4-unicast-config
 	// Configuration parameters for common IPv4 and IPv6 unicast
 	// AFI-SAFI options.
@@ -3801,141 +1768,6 @@ type Ipv4Unicast struct {
 }
 
 func (lhs *Ipv4Unicast) Equal(rhs *Ipv4Unicast) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.PrefixLimit.Equal(&(rhs.PrefixLimit)) {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:state.
-// Operational state for routing policy.
-type ApplyPolicyState struct {
-	// original -> rpol:import-policy
-	// list of policy names in sequence to be applied on
-	// receiving a routing update in the current context, e.g.,
-	// for the current peer group, neighbor, address family,
-	// etc.
-	ImportPolicyList []string `mapstructure:"import-policy-list" json:"import-policy-list,omitempty"`
-	// original -> rpol:default-import-policy
-	// explicitly set a default policy if no policy definition
-	// in the import policy chain is satisfied.
-	DefaultImportPolicy DefaultPolicyType `mapstructure:"default-import-policy" json:"default-import-policy,omitempty"`
-	// original -> rpol:export-policy
-	// list of policy names in sequence to be applied on
-	// sending a routing update in the current context, e.g.,
-	// for the current peer group, neighbor, address family,
-	// etc.
-	ExportPolicyList []string `mapstructure:"export-policy-list" json:"export-policy-list,omitempty"`
-	// original -> rpol:default-export-policy
-	// explicitly set a default policy if no policy definition
-	// in the export policy chain is satisfied.
-	DefaultExportPolicy DefaultPolicyType `mapstructure:"default-export-policy" json:"default-export-policy,omitempty"`
-	// original -> gobgp:in-policy
-	// list of policy names in sequence to be applied on
-	// sending a routing update in the current context, e.g.,
-	// for the current other route server clients.
-	InPolicyList []string `mapstructure:"in-policy-list" json:"in-policy-list,omitempty"`
-	// original -> gobgp:default-in-policy
-	// explicitly set a default policy if no policy definition
-	// in the in-policy chain is satisfied.
-	DefaultInPolicy DefaultPolicyType `mapstructure:"default-in-policy" json:"default-in-policy,omitempty"`
-}
-
-// struct for container rpol:config.
-// Policy configuration data.
-type ApplyPolicyConfig struct {
-	// original -> rpol:import-policy
-	// list of policy names in sequence to be applied on
-	// receiving a routing update in the current context, e.g.,
-	// for the current peer group, neighbor, address family,
-	// etc.
-	ImportPolicyList []string `mapstructure:"import-policy-list" json:"import-policy-list,omitempty"`
-	// original -> rpol:default-import-policy
-	// explicitly set a default policy if no policy definition
-	// in the import policy chain is satisfied.
-	DefaultImportPolicy DefaultPolicyType `mapstructure:"default-import-policy" json:"default-import-policy,omitempty"`
-	// original -> rpol:export-policy
-	// list of policy names in sequence to be applied on
-	// sending a routing update in the current context, e.g.,
-	// for the current peer group, neighbor, address family,
-	// etc.
-	ExportPolicyList []string `mapstructure:"export-policy-list" json:"export-policy-list,omitempty"`
-	// original -> rpol:default-export-policy
-	// explicitly set a default policy if no policy definition
-	// in the export policy chain is satisfied.
-	DefaultExportPolicy DefaultPolicyType `mapstructure:"default-export-policy" json:"default-export-policy,omitempty"`
-	// original -> gobgp:in-policy
-	// list of policy names in sequence to be applied on
-	// sending a routing update in the current context, e.g.,
-	// for the current other route server clients.
-	InPolicyList []string `mapstructure:"in-policy-list" json:"in-policy-list,omitempty"`
-	// original -> gobgp:default-in-policy
-	// explicitly set a default policy if no policy definition
-	// in the in-policy chain is satisfied.
-	DefaultInPolicy DefaultPolicyType `mapstructure:"default-in-policy" json:"default-in-policy,omitempty"`
-}
-
-func (lhs *ApplyPolicyConfig) Equal(rhs *ApplyPolicyConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if len(lhs.ImportPolicyList) != len(rhs.ImportPolicyList) {
-		return false
-	}
-	for idx, l := range lhs.ImportPolicyList {
-		if l != rhs.ImportPolicyList[idx] {
-			return false
-		}
-	}
-	if lhs.DefaultImportPolicy != rhs.DefaultImportPolicy {
-		return false
-	}
-	if len(lhs.ExportPolicyList) != len(rhs.ExportPolicyList) {
-		return false
-	}
-	for idx, l := range lhs.ExportPolicyList {
-		if l != rhs.ExportPolicyList[idx] {
-			return false
-		}
-	}
-	if lhs.DefaultExportPolicy != rhs.DefaultExportPolicy {
-		return false
-	}
-	if len(lhs.InPolicyList) != len(rhs.InPolicyList) {
-		return false
-	}
-	for idx, l := range lhs.InPolicyList {
-		if l != rhs.InPolicyList[idx] {
-			return false
-		}
-	}
-	if lhs.DefaultInPolicy != rhs.DefaultInPolicy {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:apply-policy.
-// Anchor point for routing policies in the model.
-// Import and export policies are with respect to the local
-// routing table, i.e., export (send) and import (receive),
-// depending on the context.
-type ApplyPolicy struct {
-	// original -> rpol:apply-policy-config
-	// Policy configuration data.
-	Config ApplyPolicyConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> rpol:apply-policy-state
-	// Operational state for routing policy.
-	State ApplyPolicyState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *ApplyPolicy) Equal(rhs *ApplyPolicy) bool {
 	if lhs == nil || rhs == nil {
 		return false
 	}
@@ -3994,93 +1826,16 @@ func (lhs *AfiSafiConfig) Equal(rhs *AfiSafiConfig) bool {
 	return true
 }
 
-// struct for container bgp-mp:state.
-// State information for BGP graceful-restart.
-type MpGracefulRestartState struct {
-	// original -> bgp-mp:enabled
-	// bgp-mp:enabled's original type is boolean.
-	// This leaf indicates whether graceful-restart is enabled for
-	// this AFI-SAFI.
-	Enabled bool `mapstructure:"enabled" json:"enabled,omitempty"`
-	// original -> bgp-op:received
-	// bgp-op:received's original type is boolean.
-	// This leaf indicates whether the neighbor advertised the
-	// ability to support graceful-restart for this AFI-SAFI.
-	Received bool `mapstructure:"received" json:"received,omitempty"`
-	// original -> bgp-op:advertised
-	// bgp-op:advertised's original type is boolean.
-	// This leaf indicates whether the ability to support
-	// graceful-restart has been advertised to the peer.
-	Advertised bool `mapstructure:"advertised" json:"advertised,omitempty"`
-	// original -> gobgp:end-of-rib-received
-	// gobgp:end-of-rib-received's original type is boolean.
-	EndOfRibReceived bool `mapstructure:"end-of-rib-received" json:"end-of-rib-received,omitempty"`
-	// original -> gobgp:end-of-rib-sent
-	// gobgp:end-of-rib-sent's original type is boolean.
-	EndOfRibSent bool `mapstructure:"end-of-rib-sent" json:"end-of-rib-sent,omitempty"`
-}
-
-// struct for container bgp-mp:config.
-// Configuration options for BGP graceful-restart.
-type MpGracefulRestartConfig struct {
-	// original -> bgp-mp:enabled
-	// bgp-mp:enabled's original type is boolean.
-	// This leaf indicates whether graceful-restart is enabled for
-	// this AFI-SAFI.
-	Enabled bool `mapstructure:"enabled" json:"enabled,omitempty"`
-}
-
-func (lhs *MpGracefulRestartConfig) Equal(rhs *MpGracefulRestartConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Enabled != rhs.Enabled {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-mp:graceful-restart.
-// Parameters relating to BGP graceful-restart.
-type MpGracefulRestart struct {
-	// original -> bgp-mp:mp-graceful-restart-config
-	// Configuration options for BGP graceful-restart.
-	Config MpGracefulRestartConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> bgp-mp:mp-graceful-restart-state
-	// State information for BGP graceful-restart.
-	State MpGracefulRestartState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *MpGracefulRestart) Equal(rhs *MpGracefulRestart) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
 // struct for container bgp-mp:afi-safi.
 // AFI,SAFI configuration available for the
 // neighbour or group.
 type AfiSafi struct {
-	// original -> bgp-mp:afi-safi-name
-	// original -> bgp-mp:mp-graceful-restart
-	// Parameters relating to BGP graceful-restart.
-	MpGracefulRestart MpGracefulRestart `mapstructure:"mp-graceful-restart" json:"mp-graceful-restart,omitempty"`
 	// original -> bgp-mp:afi-safi-config
 	// Configuration parameters for the AFI-SAFI.
 	Config AfiSafiConfig `mapstructure:"config" json:"config,omitempty"`
 	// original -> bgp-mp:afi-safi-state
 	// State information relating to the AFI-SAFI.
 	State AfiSafiState `mapstructure:"state" json:"state,omitempty"`
-	// original -> rpol:apply-policy
-	// Anchor point for routing policies in the model.
-	// Import and export policies are with respect to the local
-	// routing table, i.e., export (send) and import (receive),
-	// depending on the context.
-	ApplyPolicy ApplyPolicy `mapstructure:"apply-policy" json:"apply-policy,omitempty"`
 	// original -> bgp-mp:ipv4-unicast
 	// IPv4 unicast configuration options.
 	Ipv4Unicast Ipv4Unicast `mapstructure:"ipv4-unicast" json:"ipv4-unicast,omitempty"`
@@ -4111,21 +1866,12 @@ type AfiSafi struct {
 	// original -> bgp-mp:l2vpn-evpn
 	// BGP EVPN configuration options.
 	L2vpnEvpn L2vpnEvpn `mapstructure:"l2vpn-evpn" json:"l2vpn-evpn,omitempty"`
-	// original -> bgp-mp:route-selection-options
-	// Parameters relating to options for route selection.
-	RouteSelectionOptions RouteSelectionOptions `mapstructure:"route-selection-options" json:"route-selection-options,omitempty"`
 	// original -> bgp-mp:use-multiple-paths
 	// Parameters related to the use of multiple paths for the
 	// same NLRI.
 	UseMultiplePaths UseMultiplePaths `mapstructure:"use-multiple-paths" json:"use-multiple-paths,omitempty"`
-	// original -> bgp-mp:prefix-limit
-	// Configure the maximum number of prefixes that will be
-	// accepted from a peer.
-	PrefixLimit PrefixLimit `mapstructure:"prefix-limit" json:"prefix-limit,omitempty"`
 	// original -> gobgp:route-target-membership
 	RouteTargetMembership RouteTargetMembership `mapstructure:"route-target-membership" json:"route-target-membership,omitempty"`
-	// original -> gobgp:long-lived-graceful-restart
-	LongLivedGracefulRestart LongLivedGracefulRestart `mapstructure:"long-lived-graceful-restart" json:"long-lived-graceful-restart,omitempty"`
 	// original -> gobgp:add-paths
 	// add-paths configuration options related to a particular AFI-SAFI.
 	AddPaths AddPaths `mapstructure:"add-paths" json:"add-paths,omitempty"`
@@ -4136,13 +1882,7 @@ func (lhs *AfiSafi) Equal(rhs *AfiSafi) bool {
 	if lhs == nil || rhs == nil {
 		return false
 	}
-	if !lhs.MpGracefulRestart.Equal(&(rhs.MpGracefulRestart)) {
-		return false
-	}
 	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	if !lhs.ApplyPolicy.Equal(&(rhs.ApplyPolicy)) {
 		return false
 	}
 	if !lhs.Ipv4Unicast.Equal(&(rhs.Ipv4Unicast)) {
@@ -4175,175 +1915,13 @@ func (lhs *AfiSafi) Equal(rhs *AfiSafi) bool {
 	if !lhs.L2vpnEvpn.Equal(&(rhs.L2vpnEvpn)) {
 		return false
 	}
-	if !lhs.RouteSelectionOptions.Equal(&(rhs.RouteSelectionOptions)) {
-		return false
-	}
 	if !lhs.UseMultiplePaths.Equal(&(rhs.UseMultiplePaths)) {
-		return false
-	}
-	if !lhs.PrefixLimit.Equal(&(rhs.PrefixLimit)) {
 		return false
 	}
 	if !lhs.RouteTargetMembership.Equal(&(rhs.RouteTargetMembership)) {
 		return false
 	}
-	if !lhs.LongLivedGracefulRestart.Equal(&(rhs.LongLivedGracefulRestart)) {
-		return false
-	}
 	if !lhs.AddPaths.Equal(&(rhs.AddPaths)) {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp:state.
-// State information associated with graceful-restart.
-type GracefulRestartState struct {
-	// original -> bgp:enabled
-	// bgp:enabled's original type is boolean.
-	// Enable or disable the graceful-restart capability.
-	Enabled bool `mapstructure:"enabled" json:"enabled,omitempty"`
-	// original -> bgp:restart-time
-	// Estimated time (in seconds) for the local BGP speaker to
-	// restart a session. This value is advertise in the graceful
-	// restart BGP capability.  This is a 12-bit value, referred to
-	// as Restart Time in RFC4724.  Per RFC4724, the suggested
-	// default value is <= the hold-time value.
-	RestartTime uint16 `mapstructure:"restart-time" json:"restart-time,omitempty"`
-	// original -> bgp:stale-routes-time
-	// bgp:stale-routes-time's original type is decimal64.
-	// An upper-bound on the time thate stale routes will be
-	// retained by a router after a session is restarted. If an
-	// End-of-RIB (EOR) marker is received prior to this timer
-	// expiring stale-routes will be flushed upon its receipt - if
-	// no EOR is received, then when this timer expires stale paths
-	// will be purged. This timer is referred to as the
-	// Selection_Deferral_Timer in RFC4724.
-	StaleRoutesTime float64 `mapstructure:"stale-routes-time" json:"stale-routes-time,omitempty"`
-	// original -> bgp:helper-only
-	// bgp:helper-only's original type is boolean.
-	// Enable graceful-restart in helper mode only. When this
-	// leaf is set, the local system does not retain forwarding
-	// its own state during a restart, but supports procedures
-	// for the receiving speaker, as defined in RFC4724.
-	HelperOnly bool `mapstructure:"helper-only" json:"helper-only,omitempty"`
-	// original -> bgp-op:peer-restart-time
-	// The period of time (advertised by the peer) that
-	// the peer expects a restart of a BGP session to
-	// take.
-	PeerRestartTime uint16 `mapstructure:"peer-restart-time" json:"peer-restart-time,omitempty"`
-	// original -> bgp-op:peer-restarting
-	// bgp-op:peer-restarting's original type is boolean.
-	// This flag indicates whether the remote neighbor is currently
-	// in the process of restarting, and hence received routes are
-	// currently stale.
-	PeerRestarting bool `mapstructure:"peer-restarting" json:"peer-restarting,omitempty"`
-	// original -> bgp-op:local-restarting
-	// bgp-op:local-restarting's original type is boolean.
-	// This flag indicates whether the local neighbor is currently
-	// restarting. The flag is unset after all NLRI have been
-	// advertised to the peer, and the End-of-RIB (EOR) marker has
-	// been unset.
-	LocalRestarting bool `mapstructure:"local-restarting" json:"local-restarting,omitempty"`
-	// original -> bgp-op:mode
-	// Ths leaf indicates the mode of operation of BGP graceful
-	// restart with the peer.
-	Mode Mode `mapstructure:"mode" json:"mode,omitempty"`
-	// original -> gobgp:deferral-time
-	DeferralTime uint16 `mapstructure:"deferral-time" json:"deferral-time,omitempty"`
-	// original -> gobgp:notification-enabled
-	// gobgp:notification-enabled's original type is boolean.
-	NotificationEnabled bool `mapstructure:"notification-enabled" json:"notification-enabled,omitempty"`
-	// original -> gobgp:long-lived-enabled
-	// gobgp:long-lived-enabled's original type is boolean.
-	LongLivedEnabled bool `mapstructure:"long-lived-enabled" json:"long-lived-enabled,omitempty"`
-}
-
-// struct for container bgp:config.
-// Configuration parameters relating to graceful-restart.
-type GracefulRestartConfig struct {
-	// original -> bgp:enabled
-	// bgp:enabled's original type is boolean.
-	// Enable or disable the graceful-restart capability.
-	Enabled bool `mapstructure:"enabled" json:"enabled,omitempty"`
-	// original -> bgp:restart-time
-	// Estimated time (in seconds) for the local BGP speaker to
-	// restart a session. This value is advertise in the graceful
-	// restart BGP capability.  This is a 12-bit value, referred to
-	// as Restart Time in RFC4724.  Per RFC4724, the suggested
-	// default value is <= the hold-time value.
-	RestartTime uint16 `mapstructure:"restart-time" json:"restart-time,omitempty"`
-	// original -> bgp:stale-routes-time
-	// bgp:stale-routes-time's original type is decimal64.
-	// An upper-bound on the time thate stale routes will be
-	// retained by a router after a session is restarted. If an
-	// End-of-RIB (EOR) marker is received prior to this timer
-	// expiring stale-routes will be flushed upon its receipt - if
-	// no EOR is received, then when this timer expires stale paths
-	// will be purged. This timer is referred to as the
-	// Selection_Deferral_Timer in RFC4724.
-	StaleRoutesTime float64 `mapstructure:"stale-routes-time" json:"stale-routes-time,omitempty"`
-	// original -> bgp:helper-only
-	// bgp:helper-only's original type is boolean.
-	// Enable graceful-restart in helper mode only. When this
-	// leaf is set, the local system does not retain forwarding
-	// its own state during a restart, but supports procedures
-	// for the receiving speaker, as defined in RFC4724.
-	HelperOnly bool `mapstructure:"helper-only" json:"helper-only,omitempty"`
-	// original -> gobgp:deferral-time
-	DeferralTime uint16 `mapstructure:"deferral-time" json:"deferral-time,omitempty"`
-	// original -> gobgp:notification-enabled
-	// gobgp:notification-enabled's original type is boolean.
-	NotificationEnabled bool `mapstructure:"notification-enabled" json:"notification-enabled,omitempty"`
-	// original -> gobgp:long-lived-enabled
-	// gobgp:long-lived-enabled's original type is boolean.
-	LongLivedEnabled bool `mapstructure:"long-lived-enabled" json:"long-lived-enabled,omitempty"`
-}
-
-func (lhs *GracefulRestartConfig) Equal(rhs *GracefulRestartConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Enabled != rhs.Enabled {
-		return false
-	}
-	if lhs.RestartTime != rhs.RestartTime {
-		return false
-	}
-	if lhs.StaleRoutesTime != rhs.StaleRoutesTime {
-		return false
-	}
-	if lhs.HelperOnly != rhs.HelperOnly {
-		return false
-	}
-	if lhs.DeferralTime != rhs.DeferralTime {
-		return false
-	}
-	if lhs.NotificationEnabled != rhs.NotificationEnabled {
-		return false
-	}
-	if lhs.LongLivedEnabled != rhs.LongLivedEnabled {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp:graceful-restart.
-// Parameters relating the graceful restart mechanism for BGP.
-type GracefulRestart struct {
-	// original -> bgp:graceful-restart-config
-	// Configuration parameters relating to graceful-restart.
-	Config GracefulRestartConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> bgp:graceful-restart-state
-	// State information associated with graceful-restart.
-	State GracefulRestartState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *GracefulRestart) Equal(rhs *GracefulRestart) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
 		return false
 	}
 	return true
@@ -4529,87 +2107,6 @@ func (lhs *UseMultiplePaths) Equal(rhs *UseMultiplePaths) bool {
 }
 
 // struct for container bgp:state.
-// State information relating to the BGP confederations.
-type ConfederationState struct {
-	// original -> bgp:enabled
-	// bgp:enabled's original type is boolean.
-	// When this leaf is set to true it indicates that
-	// the local-AS is part of a BGP confederation.
-	Enabled bool `mapstructure:"enabled" json:"enabled,omitempty"`
-	// original -> bgp:identifier
-	// bgp:identifier's original type is inet:as-number.
-	// Confederation identifier for the autonomous system.
-	Identifier uint32 `mapstructure:"identifier" json:"identifier,omitempty"`
-	// original -> bgp:member-as
-	// original type is list of inet:as-number
-	// Remote autonomous systems that are to be treated
-	// as part of the local confederation.
-	MemberAsList []uint32 `mapstructure:"member-as-list" json:"member-as-list,omitempty"`
-}
-
-// struct for container bgp:config.
-// Configuration parameters relating to BGP confederations.
-type ConfederationConfig struct {
-	// original -> bgp:enabled
-	// bgp:enabled's original type is boolean.
-	// When this leaf is set to true it indicates that
-	// the local-AS is part of a BGP confederation.
-	Enabled bool `mapstructure:"enabled" json:"enabled,omitempty"`
-	// original -> bgp:identifier
-	// bgp:identifier's original type is inet:as-number.
-	// Confederation identifier for the autonomous system.
-	Identifier uint32 `mapstructure:"identifier" json:"identifier,omitempty"`
-	// original -> bgp:member-as
-	// original type is list of inet:as-number
-	// Remote autonomous systems that are to be treated
-	// as part of the local confederation.
-	MemberAsList []uint32 `mapstructure:"member-as-list" json:"member-as-list,omitempty"`
-}
-
-func (lhs *ConfederationConfig) Equal(rhs *ConfederationConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Enabled != rhs.Enabled {
-		return false
-	}
-	if lhs.Identifier != rhs.Identifier {
-		return false
-	}
-	if len(lhs.MemberAsList) != len(rhs.MemberAsList) {
-		return false
-	}
-	for idx, l := range lhs.MemberAsList {
-		if l != rhs.MemberAsList[idx] {
-			return false
-		}
-	}
-	return true
-}
-
-// struct for container bgp:confederation.
-// Parameters indicating whether the local system acts as part
-// of a BGP confederation.
-type Confederation struct {
-	// original -> bgp:confederation-config
-	// Configuration parameters relating to BGP confederations.
-	Config ConfederationConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> bgp:confederation-state
-	// State information relating to the BGP confederations.
-	State ConfederationState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *Confederation) Equal(rhs *Confederation) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp:state.
 // State information relating to the default route distance.
 type DefaultRouteDistanceState struct {
 	// original -> bgp:external-route-distance
@@ -4673,145 +2170,6 @@ func (lhs *DefaultRouteDistance) Equal(rhs *DefaultRouteDistance) bool {
 	return true
 }
 
-// struct for container bgp-mp:state.
-// State information for the route selection options.
-type RouteSelectionOptionsState struct {
-	// original -> bgp-mp:always-compare-med
-	// bgp-mp:always-compare-med's original type is boolean.
-	// Compare multi-exit discriminator (MED) value from
-	// different ASes when selecting the best route.  The
-	// default behavior is to only compare MEDs for paths
-	// received from the same AS.
-	AlwaysCompareMed bool `mapstructure:"always-compare-med" json:"always-compare-med,omitempty"`
-	// original -> bgp-mp:ignore-as-path-length
-	// bgp-mp:ignore-as-path-length's original type is boolean.
-	// Ignore the AS path length when selecting the best path.
-	// The default is to use the AS path length and prefer paths
-	// with shorter length.
-	IgnoreAsPathLength bool `mapstructure:"ignore-as-path-length" json:"ignore-as-path-length,omitempty"`
-	// original -> bgp-mp:external-compare-router-id
-	// bgp-mp:external-compare-router-id's original type is boolean.
-	// When comparing similar routes received from external
-	// BGP peers, use the router-id as a criterion to select
-	// the active path.
-	ExternalCompareRouterId bool `mapstructure:"external-compare-router-id" json:"external-compare-router-id,omitempty"`
-	// original -> bgp-mp:advertise-inactive-routes
-	// bgp-mp:advertise-inactive-routes's original type is boolean.
-	// Advertise inactive routes to external peers.  The
-	// default is to only advertise active routes.
-	AdvertiseInactiveRoutes bool `mapstructure:"advertise-inactive-routes" json:"advertise-inactive-routes,omitempty"`
-	// original -> bgp-mp:enable-aigp
-	// bgp-mp:enable-aigp's original type is boolean.
-	// Flag to enable sending / receiving accumulated IGP
-	// attribute in routing updates.
-	EnableAigp bool `mapstructure:"enable-aigp" json:"enable-aigp,omitempty"`
-	// original -> bgp-mp:ignore-next-hop-igp-metric
-	// bgp-mp:ignore-next-hop-igp-metric's original type is boolean.
-	// Ignore the IGP metric to the next-hop when calculating
-	// BGP best-path. The default is to select the route for
-	// which the metric to the next-hop is lowest.
-	IgnoreNextHopIgpMetric bool `mapstructure:"ignore-next-hop-igp-metric" json:"ignore-next-hop-igp-metric,omitempty"`
-	// original -> gobgp:disable-best-path-selection
-	// gobgp:disable-best-path-selection's original type is boolean.
-	// Disables best path selection process.
-	DisableBestPathSelection bool `mapstructure:"disable-best-path-selection" json:"disable-best-path-selection,omitempty"`
-}
-
-// struct for container bgp-mp:config.
-// Configuration parameters relating to route selection
-// options.
-type RouteSelectionOptionsConfig struct {
-	// original -> bgp-mp:always-compare-med
-	// bgp-mp:always-compare-med's original type is boolean.
-	// Compare multi-exit discriminator (MED) value from
-	// different ASes when selecting the best route.  The
-	// default behavior is to only compare MEDs for paths
-	// received from the same AS.
-	AlwaysCompareMed bool `mapstructure:"always-compare-med" json:"always-compare-med,omitempty"`
-	// original -> bgp-mp:ignore-as-path-length
-	// bgp-mp:ignore-as-path-length's original type is boolean.
-	// Ignore the AS path length when selecting the best path.
-	// The default is to use the AS path length and prefer paths
-	// with shorter length.
-	IgnoreAsPathLength bool `mapstructure:"ignore-as-path-length" json:"ignore-as-path-length,omitempty"`
-	// original -> bgp-mp:external-compare-router-id
-	// bgp-mp:external-compare-router-id's original type is boolean.
-	// When comparing similar routes received from external
-	// BGP peers, use the router-id as a criterion to select
-	// the active path.
-	ExternalCompareRouterId bool `mapstructure:"external-compare-router-id" json:"external-compare-router-id,omitempty"`
-	// original -> bgp-mp:advertise-inactive-routes
-	// bgp-mp:advertise-inactive-routes's original type is boolean.
-	// Advertise inactive routes to external peers.  The
-	// default is to only advertise active routes.
-	AdvertiseInactiveRoutes bool `mapstructure:"advertise-inactive-routes" json:"advertise-inactive-routes,omitempty"`
-	// original -> bgp-mp:enable-aigp
-	// bgp-mp:enable-aigp's original type is boolean.
-	// Flag to enable sending / receiving accumulated IGP
-	// attribute in routing updates.
-	EnableAigp bool `mapstructure:"enable-aigp" json:"enable-aigp,omitempty"`
-	// original -> bgp-mp:ignore-next-hop-igp-metric
-	// bgp-mp:ignore-next-hop-igp-metric's original type is boolean.
-	// Ignore the IGP metric to the next-hop when calculating
-	// BGP best-path. The default is to select the route for
-	// which the metric to the next-hop is lowest.
-	IgnoreNextHopIgpMetric bool `mapstructure:"ignore-next-hop-igp-metric" json:"ignore-next-hop-igp-metric,omitempty"`
-	// original -> gobgp:disable-best-path-selection
-	// gobgp:disable-best-path-selection's original type is boolean.
-	// Disables best path selection process.
-	DisableBestPathSelection bool `mapstructure:"disable-best-path-selection" json:"disable-best-path-selection,omitempty"`
-}
-
-func (lhs *RouteSelectionOptionsConfig) Equal(rhs *RouteSelectionOptionsConfig) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.AlwaysCompareMed != rhs.AlwaysCompareMed {
-		return false
-	}
-	if lhs.IgnoreAsPathLength != rhs.IgnoreAsPathLength {
-		return false
-	}
-	if lhs.ExternalCompareRouterId != rhs.ExternalCompareRouterId {
-		return false
-	}
-	if lhs.AdvertiseInactiveRoutes != rhs.AdvertiseInactiveRoutes {
-		return false
-	}
-	if lhs.EnableAigp != rhs.EnableAigp {
-		return false
-	}
-	if lhs.IgnoreNextHopIgpMetric != rhs.IgnoreNextHopIgpMetric {
-		return false
-	}
-	if lhs.DisableBestPathSelection != rhs.DisableBestPathSelection {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-mp:route-selection-options.
-// Parameters relating to options for route selection.
-type RouteSelectionOptions struct {
-	// original -> bgp-mp:route-selection-options-config
-	// Configuration parameters relating to route selection
-	// options.
-	Config RouteSelectionOptionsConfig `mapstructure:"config" json:"config,omitempty"`
-	// original -> bgp-mp:route-selection-options-state
-	// State information for the route selection options.
-	State RouteSelectionOptionsState `mapstructure:"state" json:"state,omitempty"`
-}
-
-func (lhs *RouteSelectionOptions) Equal(rhs *RouteSelectionOptions) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.Config.Equal(&(rhs.Config)) {
-		return false
-	}
-	return true
-}
-
 // struct for container bgp:state.
 // State information relating to the global BGP router.
 type GlobalState struct {
@@ -4835,6 +2193,7 @@ type GlobalState struct {
 	Port int32 `mapstructure:"port" json:"port,omitempty"`
 	// original -> gobgp:local-address
 	LocalAddressList []string `mapstructure:"local-address-list" json:"local-address-list,omitempty"`
+	Role             string   `mapstructure:"role" json:"role,omitempty"`
 }
 
 // struct for container bgp:config.
@@ -4854,6 +2213,7 @@ type GlobalConfig struct {
 	Port int32 `mapstructure:"port" json:"port,omitempty"`
 	// original -> gobgp:local-address
 	LocalAddressList []string `mapstructure:"local-address-list" json:"local-address-list,omitempty"`
+	Role             string   `mapstructure:"role" json:"role,omitempty"`
 }
 
 func (lhs *GlobalConfig) Equal(rhs *GlobalConfig) bool {
@@ -4877,6 +2237,9 @@ func (lhs *GlobalConfig) Equal(rhs *GlobalConfig) bool {
 			return false
 		}
 	}
+	if lhs.Role != rhs.Role {
+		return false
+	}
 	return true
 }
 
@@ -4889,34 +2252,18 @@ type Global struct {
 	// original -> bgp:global-state
 	// State information relating to the global BGP router.
 	State GlobalState `mapstructure:"state" json:"state,omitempty"`
-	// original -> bgp-mp:route-selection-options
-	// Parameters relating to options for route selection.
-	RouteSelectionOptions RouteSelectionOptions `mapstructure:"route-selection-options" json:"route-selection-options,omitempty"`
 	// original -> bgp:default-route-distance
 	// Administrative distance (or preference) assigned to
 	// routes received from different sources
 	// (external, internal, and local).
 	DefaultRouteDistance DefaultRouteDistance `mapstructure:"default-route-distance" json:"default-route-distance,omitempty"`
-	// original -> bgp:confederation
-	// Parameters indicating whether the local system acts as part
-	// of a BGP confederation.
-	Confederation Confederation `mapstructure:"confederation" json:"confederation,omitempty"`
 	// original -> bgp-mp:use-multiple-paths
 	// Parameters related to the use of multiple paths for the
 	// same NLRI.
 	UseMultiplePaths UseMultiplePaths `mapstructure:"use-multiple-paths" json:"use-multiple-paths,omitempty"`
-	// original -> bgp:graceful-restart
-	// Parameters relating the graceful restart mechanism for BGP.
-	GracefulRestart GracefulRestart `mapstructure:"graceful-restart" json:"graceful-restart,omitempty"`
 	// original -> bgp:afi-safis
 	// Address family specific configuration.
 	AfiSafis []AfiSafi `mapstructure:"afi-safis" json:"afi-safis,omitempty"`
-	// original -> rpol:apply-policy
-	// Anchor point for routing policies in the model.
-	// Import and export policies are with respect to the local
-	// routing table, i.e., export (send) and import (receive),
-	// depending on the context.
-	ApplyPolicy ApplyPolicy `mapstructure:"apply-policy" json:"apply-policy,omitempty"`
 }
 
 func (lhs *Global) Equal(rhs *Global) bool {
@@ -4926,19 +2273,10 @@ func (lhs *Global) Equal(rhs *Global) bool {
 	if !lhs.Config.Equal(&(rhs.Config)) {
 		return false
 	}
-	if !lhs.RouteSelectionOptions.Equal(&(rhs.RouteSelectionOptions)) {
-		return false
-	}
 	if !lhs.DefaultRouteDistance.Equal(&(rhs.DefaultRouteDistance)) {
 		return false
 	}
-	if !lhs.Confederation.Equal(&(rhs.Confederation)) {
-		return false
-	}
 	if !lhs.UseMultiplePaths.Equal(&(rhs.UseMultiplePaths)) {
-		return false
-	}
-	if !lhs.GracefulRestart.Equal(&(rhs.GracefulRestart)) {
 		return false
 	}
 	if len(lhs.AfiSafis) != len(rhs.AfiSafis) {
@@ -4957,9 +2295,6 @@ func (lhs *Global) Equal(rhs *Global) bool {
 			}
 		}
 	}
-	if !lhs.ApplyPolicy.Equal(&(rhs.ApplyPolicy)) {
-		return false
-	}
 	return true
 }
 
@@ -4971,24 +2306,7 @@ type Bgp struct {
 	Global Global `mapstructure:"global" json:"global,omitempty"`
 	// original -> bgp:neighbors
 	// Configuration for BGP neighbors.
-	Neighbors []Neighbor `mapstructure:"neighbors" json:"neighbors,omitempty"`
-	// original -> bgp:peer-groups
-	// Configuration for BGP peer-groups.
-	PeerGroups []PeerGroup `mapstructure:"peer-groups" json:"peer-groups,omitempty"`
-	// original -> gobgp:rpki-servers
-	RpkiServers []RpkiServer `mapstructure:"rpki-servers" json:"rpki-servers,omitempty"`
-	// original -> gobgp:bmp-servers
-	BmpServers []BmpServer `mapstructure:"bmp-servers" json:"bmp-servers,omitempty"`
-	// original -> gobgp:vrfs
-	Vrfs []Vrf `mapstructure:"vrfs" json:"vrfs,omitempty"`
-	// original -> gobgp:mrt-dump
-	MrtDump []Mrt `mapstructure:"mrt-dump" json:"mrt-dump,omitempty"`
-	// original -> gobgp:zebra
-	Zebra Zebra `mapstructure:"zebra" json:"zebra,omitempty"`
-	// original -> gobgp:collector
-	Collector Collector `mapstructure:"collector" json:"collector,omitempty"`
-	// original -> gobgp:dynamic-neighbors
-	DynamicNeighbors []DynamicNeighbor `mapstructure:"dynamic-neighbors" json:"dynamic-neighbors,omitempty"`
+	Peers []Peer `mapstructure:"peers" json:"peers,omitempty"`
 }
 
 func (lhs *Bgp) Equal(rhs *Bgp) bool {
@@ -4998,1421 +2316,16 @@ func (lhs *Bgp) Equal(rhs *Bgp) bool {
 	if !lhs.Global.Equal(&(rhs.Global)) {
 		return false
 	}
-	if len(lhs.Neighbors) != len(rhs.Neighbors) {
+	if len(lhs.Peers) != len(rhs.Peers) {
 		return false
 	}
 	{
-		lmap := make(map[string]*Neighbor)
-		for i, l := range lhs.Neighbors {
-			lmap[mapkey(i, string(l.Config.NeighborAddress))] = &lhs.Neighbors[i]
+		lmap := make(map[string]*Peer)
+		for i, l := range lhs.Peers {
+			lmap[mapkey(i, string(l.Config.PeerAddress))] = &lhs.Peers[i]
 		}
-		for i, r := range rhs.Neighbors {
-			if l, y := lmap[mapkey(i, string(r.Config.NeighborAddress))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if len(lhs.PeerGroups) != len(rhs.PeerGroups) {
-		return false
-	}
-	{
-		lmap := make(map[string]*PeerGroup)
-		for i, l := range lhs.PeerGroups {
-			lmap[mapkey(i, string(l.Config.PeerGroupName))] = &lhs.PeerGroups[i]
-		}
-		for i, r := range rhs.PeerGroups {
-			if l, y := lmap[mapkey(i, string(r.Config.PeerGroupName))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if len(lhs.RpkiServers) != len(rhs.RpkiServers) {
-		return false
-	}
-	{
-		lmap := make(map[string]*RpkiServer)
-		for i, l := range lhs.RpkiServers {
-			lmap[mapkey(i, string(l.Config.Address))] = &lhs.RpkiServers[i]
-		}
-		for i, r := range rhs.RpkiServers {
-			if l, y := lmap[mapkey(i, string(r.Config.Address))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if len(lhs.BmpServers) != len(rhs.BmpServers) {
-		return false
-	}
-	{
-		lmap := make(map[string]*BmpServer)
-		for i, l := range lhs.BmpServers {
-			lmap[mapkey(i, string(l.Config.Address))] = &lhs.BmpServers[i]
-		}
-		for i, r := range rhs.BmpServers {
-			if l, y := lmap[mapkey(i, string(r.Config.Address))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if len(lhs.Vrfs) != len(rhs.Vrfs) {
-		return false
-	}
-	{
-		lmap := make(map[string]*Vrf)
-		for i, l := range lhs.Vrfs {
-			lmap[mapkey(i, string(l.Config.Name))] = &lhs.Vrfs[i]
-		}
-		for i, r := range rhs.Vrfs {
-			if l, y := lmap[mapkey(i, string(r.Config.Name))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if len(lhs.MrtDump) != len(rhs.MrtDump) {
-		return false
-	}
-	{
-		lmap := make(map[string]*Mrt)
-		for i, l := range lhs.MrtDump {
-			lmap[mapkey(i, string(l.Config.FileName))] = &lhs.MrtDump[i]
-		}
-		for i, r := range rhs.MrtDump {
-			if l, y := lmap[mapkey(i, string(r.Config.FileName))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if !lhs.Zebra.Equal(&(rhs.Zebra)) {
-		return false
-	}
-	if !lhs.Collector.Equal(&(rhs.Collector)) {
-		return false
-	}
-	if len(lhs.DynamicNeighbors) != len(rhs.DynamicNeighbors) {
-		return false
-	}
-	{
-		lmap := make(map[string]*DynamicNeighbor)
-		for i, l := range lhs.DynamicNeighbors {
-			lmap[mapkey(i, string(l.Config.Prefix))] = &lhs.DynamicNeighbors[i]
-		}
-		for i, r := range rhs.DynamicNeighbors {
-			if l, y := lmap[mapkey(i, string(r.Config.Prefix))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-// struct for container gobgp:set-large-community-method.
-type SetLargeCommunityMethod struct {
-	// original -> gobgp:communities
-	CommunitiesList []string `mapstructure:"communities-list" json:"communities-list,omitempty"`
-}
-
-func (lhs *SetLargeCommunityMethod) Equal(rhs *SetLargeCommunityMethod) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if len(lhs.CommunitiesList) != len(rhs.CommunitiesList) {
-		return false
-	}
-	for idx, l := range lhs.CommunitiesList {
-		if l != rhs.CommunitiesList[idx] {
-			return false
-		}
-	}
-	return true
-}
-
-// struct for container gobgp:set-large-community.
-type SetLargeCommunity struct {
-	// original -> gobgp:set-large-community-method
-	SetLargeCommunityMethod SetLargeCommunityMethod `mapstructure:"set-large-community-method" json:"set-large-community-method,omitempty"`
-	// original -> gobgp:options
-	Options BgpSetCommunityOptionType `mapstructure:"options" json:"options,omitempty"`
-}
-
-func (lhs *SetLargeCommunity) Equal(rhs *SetLargeCommunity) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.SetLargeCommunityMethod.Equal(&(rhs.SetLargeCommunityMethod)) {
-		return false
-	}
-	if lhs.Options != rhs.Options {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-pol:set-ext-community-method.
-// Option to set communities using an inline list or
-// reference to an existing defined set.
-type SetExtCommunityMethod struct {
-	// original -> bgp-pol:communities
-	// original type is list of union
-	// Set the community values for the update inline with
-	// a list.
-	CommunitiesList []string `mapstructure:"communities-list" json:"communities-list,omitempty"`
-	// original -> bgp-pol:ext-community-set-ref
-	// References a defined extended community set by
-	// name.
-	ExtCommunitySetRef string `mapstructure:"ext-community-set-ref" json:"ext-community-set-ref,omitempty"`
-}
-
-func (lhs *SetExtCommunityMethod) Equal(rhs *SetExtCommunityMethod) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if len(lhs.CommunitiesList) != len(rhs.CommunitiesList) {
-		return false
-	}
-	for idx, l := range lhs.CommunitiesList {
-		if l != rhs.CommunitiesList[idx] {
-			return false
-		}
-	}
-	if lhs.ExtCommunitySetRef != rhs.ExtCommunitySetRef {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-pol:set-ext-community.
-// Action to set the extended community attributes of the
-// route, along with options to modify how the community is
-// modified.
-type SetExtCommunity struct {
-	// original -> bgp-pol:set-ext-community-method
-	// Option to set communities using an inline list or
-	// reference to an existing defined set.
-	SetExtCommunityMethod SetExtCommunityMethod `mapstructure:"set-ext-community-method" json:"set-ext-community-method,omitempty"`
-	// original -> bgp-pol:options
-	// bgp-pol:options's original type is bgp-set-community-option-type.
-	// options for modifying the extended community
-	// attribute with the specified values. These options
-	// apply to both methods of setting the community
-	// attribute.
-	Options string `mapstructure:"options" json:"options,omitempty"`
-}
-
-func (lhs *SetExtCommunity) Equal(rhs *SetExtCommunity) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.SetExtCommunityMethod.Equal(&(rhs.SetExtCommunityMethod)) {
-		return false
-	}
-	if lhs.Options != rhs.Options {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-pol:set-community-method.
-// Option to set communities using an inline list or
-// reference to an existing defined set.
-type SetCommunityMethod struct {
-	// original -> bgp-pol:communities
-	// original type is list of union
-	// Set the community values for the update inline with
-	// a list.
-	CommunitiesList []string `mapstructure:"communities-list" json:"communities-list,omitempty"`
-	// original -> bgp-pol:community-set-ref
-	// References a defined community set by name.
-	CommunitySetRef string `mapstructure:"community-set-ref" json:"community-set-ref,omitempty"`
-}
-
-func (lhs *SetCommunityMethod) Equal(rhs *SetCommunityMethod) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if len(lhs.CommunitiesList) != len(rhs.CommunitiesList) {
-		return false
-	}
-	for idx, l := range lhs.CommunitiesList {
-		if l != rhs.CommunitiesList[idx] {
-			return false
-		}
-	}
-	if lhs.CommunitySetRef != rhs.CommunitySetRef {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-pol:set-community.
-// action to set the community attributes of the route, along
-// with options to modify how the community is modified.
-type SetCommunity struct {
-	// original -> bgp-pol:set-community-method
-	// Option to set communities using an inline list or
-	// reference to an existing defined set.
-	SetCommunityMethod SetCommunityMethod `mapstructure:"set-community-method" json:"set-community-method,omitempty"`
-	// original -> bgp-pol:options
-	// bgp-pol:options's original type is bgp-set-community-option-type.
-	// Options for modifying the community attribute with
-	// the specified values.  These options apply to both
-	// methods of setting the community attribute.
-	Options string `mapstructure:"options" json:"options,omitempty"`
-}
-
-func (lhs *SetCommunity) Equal(rhs *SetCommunity) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.SetCommunityMethod.Equal(&(rhs.SetCommunityMethod)) {
-		return false
-	}
-	if lhs.Options != rhs.Options {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-pol:set-as-path-prepend.
-// action to prepend local AS number to the AS-path a
-// specified number of times.
-type SetAsPathPrepend struct {
-	// original -> bgp-pol:repeat-n
-	// number of times to prepend the local AS
-	// number.
-	RepeatN uint8 `mapstructure:"repeat-n" json:"repeat-n,omitempty"`
-	// original -> gobgp:as
-	// gobgp:as's original type is union.
-	// autonomous system number or 'last-as' which means
-	// the leftmost as number in the AS-path to be prepended.
-	As string `mapstructure:"as" json:"as,omitempty"`
-}
-
-func (lhs *SetAsPathPrepend) Equal(rhs *SetAsPathPrepend) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.RepeatN != rhs.RepeatN {
-		return false
-	}
-	if lhs.As != rhs.As {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-pol:bgp-actions.
-// Definitions for policy action statements that
-// change BGP-specific attributes of the route.
-type BgpActions struct {
-	// original -> bgp-pol:set-as-path-prepend
-	// action to prepend local AS number to the AS-path a
-	// specified number of times.
-	SetAsPathPrepend SetAsPathPrepend `mapstructure:"set-as-path-prepend" json:"set-as-path-prepend,omitempty"`
-	// original -> bgp-pol:set-community
-	// action to set the community attributes of the route, along
-	// with options to modify how the community is modified.
-	SetCommunity SetCommunity `mapstructure:"set-community" json:"set-community,omitempty"`
-	// original -> bgp-pol:set-ext-community
-	// Action to set the extended community attributes of the
-	// route, along with options to modify how the community is
-	// modified.
-	SetExtCommunity SetExtCommunity `mapstructure:"set-ext-community" json:"set-ext-community,omitempty"`
-	// original -> bgp-pol:set-route-origin
-	// set the origin attribute to the specified
-	// value.
-	SetRouteOrigin BgpOriginAttrType `mapstructure:"set-route-origin" json:"set-route-origin,omitempty"`
-	// original -> bgp-pol:set-local-pref
-	// set the local pref attribute on the route
-	// update.
-	SetLocalPref uint32 `mapstructure:"set-local-pref" json:"set-local-pref,omitempty"`
-	// original -> bgp-pol:set-next-hop
-	// set the next-hop attribute in the route update.
-	SetNextHop BgpNextHopType `mapstructure:"set-next-hop" json:"set-next-hop,omitempty"`
-	// original -> bgp-pol:set-med
-	// set the med metric attribute in the route
-	// update.
-	SetMed BgpSetMedType `mapstructure:"set-med" json:"set-med,omitempty"`
-	// original -> gobgp:set-large-community
-	SetLargeCommunity SetLargeCommunity `mapstructure:"set-large-community" json:"set-large-community,omitempty"`
-}
-
-func (lhs *BgpActions) Equal(rhs *BgpActions) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.SetAsPathPrepend.Equal(&(rhs.SetAsPathPrepend)) {
-		return false
-	}
-	if !lhs.SetCommunity.Equal(&(rhs.SetCommunity)) {
-		return false
-	}
-	if !lhs.SetExtCommunity.Equal(&(rhs.SetExtCommunity)) {
-		return false
-	}
-	if lhs.SetRouteOrigin != rhs.SetRouteOrigin {
-		return false
-	}
-	if lhs.SetLocalPref != rhs.SetLocalPref {
-		return false
-	}
-	if lhs.SetNextHop != rhs.SetNextHop {
-		return false
-	}
-	if lhs.SetMed != rhs.SetMed {
-		return false
-	}
-	if !lhs.SetLargeCommunity.Equal(&(rhs.SetLargeCommunity)) {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:igp-actions.
-// Actions to set IGP route attributes; these actions
-// apply to multiple IGPs.
-type IgpActions struct {
-	// original -> rpol:set-tag
-	// Set the tag value for OSPF or IS-IS routes.
-	SetTag TagType `mapstructure:"set-tag" json:"set-tag,omitempty"`
-}
-
-func (lhs *IgpActions) Equal(rhs *IgpActions) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.SetTag != rhs.SetTag {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:actions.
-// Action statements for this policy
-// statement.
-type Actions struct {
-	// original -> rpol:route-disposition
-	// Select the final disposition for the route, either
-	// accept or reject.
-	RouteDisposition RouteDisposition `mapstructure:"route-disposition" json:"route-disposition,omitempty"`
-	// original -> rpol:igp-actions
-	// Actions to set IGP route attributes; these actions
-	// apply to multiple IGPs.
-	IgpActions IgpActions `mapstructure:"igp-actions" json:"igp-actions,omitempty"`
-	// original -> bgp-pol:bgp-actions
-	// Definitions for policy action statements that
-	// change BGP-specific attributes of the route.
-	BgpActions BgpActions `mapstructure:"bgp-actions" json:"bgp-actions,omitempty"`
-}
-
-func (lhs *Actions) Equal(rhs *Actions) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.RouteDisposition != rhs.RouteDisposition {
-		return false
-	}
-	if !lhs.IgpActions.Equal(&(rhs.IgpActions)) {
-		return false
-	}
-	if !lhs.BgpActions.Equal(&(rhs.BgpActions)) {
-		return false
-	}
-	return true
-}
-
-// struct for container gobgp:match-large-community-set.
-type MatchLargeCommunitySet struct {
-	// original -> gobgp:large-community-set
-	LargeCommunitySet string `mapstructure:"large-community-set" json:"large-community-set,omitempty"`
-	// original -> rpol:match-set-options
-	// Optional parameter that governs the behaviour of the
-	// match operation.
-	MatchSetOptions MatchSetOptionsType `mapstructure:"match-set-options" json:"match-set-options,omitempty"`
-}
-
-func (lhs *MatchLargeCommunitySet) Equal(rhs *MatchLargeCommunitySet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.LargeCommunitySet != rhs.LargeCommunitySet {
-		return false
-	}
-	if lhs.MatchSetOptions != rhs.MatchSetOptions {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-pol:as-path-length.
-// Value and comparison operations for conditions based on the
-// length of the AS path in the route update.
-type AsPathLength struct {
-	// original -> ptypes:operator
-	// type of comparison to be performed.
-	Operator AttributeComparison `mapstructure:"operator" json:"operator,omitempty"`
-	// original -> ptypes:value
-	// value to compare with the community count.
-	Value uint32 `mapstructure:"value" json:"value,omitempty"`
-}
-
-func (lhs *AsPathLength) Equal(rhs *AsPathLength) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Operator != rhs.Operator {
-		return false
-	}
-	if lhs.Value != rhs.Value {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-pol:community-count.
-// Value and comparison operations for conditions based on the
-// number of communities in the route update.
-type CommunityCount struct {
-	// original -> ptypes:operator
-	// type of comparison to be performed.
-	Operator AttributeComparison `mapstructure:"operator" json:"operator,omitempty"`
-	// original -> ptypes:value
-	// value to compare with the community count.
-	Value uint32 `mapstructure:"value" json:"value,omitempty"`
-}
-
-func (lhs *CommunityCount) Equal(rhs *CommunityCount) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Operator != rhs.Operator {
-		return false
-	}
-	if lhs.Value != rhs.Value {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-pol:match-as-path-set.
-// Match a referenced as-path set according to the logic
-// defined in the match-set-options leaf.
-type MatchAsPathSet struct {
-	// original -> bgp-pol:as-path-set
-	// References a defined AS path set.
-	AsPathSet string `mapstructure:"as-path-set" json:"as-path-set,omitempty"`
-	// original -> rpol:match-set-options
-	// Optional parameter that governs the behaviour of the
-	// match operation.
-	MatchSetOptions MatchSetOptionsType `mapstructure:"match-set-options" json:"match-set-options,omitempty"`
-}
-
-func (lhs *MatchAsPathSet) Equal(rhs *MatchAsPathSet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.AsPathSet != rhs.AsPathSet {
-		return false
-	}
-	if lhs.MatchSetOptions != rhs.MatchSetOptions {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-pol:match-ext-community-set.
-// Match a referenced extended community-set according to the
-// logic defined in the match-set-options leaf.
-type MatchExtCommunitySet struct {
-	// original -> bgp-pol:ext-community-set
-	// References a defined extended community set.
-	ExtCommunitySet string `mapstructure:"ext-community-set" json:"ext-community-set,omitempty"`
-	// original -> rpol:match-set-options
-	// Optional parameter that governs the behaviour of the
-	// match operation.
-	MatchSetOptions MatchSetOptionsType `mapstructure:"match-set-options" json:"match-set-options,omitempty"`
-}
-
-func (lhs *MatchExtCommunitySet) Equal(rhs *MatchExtCommunitySet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.ExtCommunitySet != rhs.ExtCommunitySet {
-		return false
-	}
-	if lhs.MatchSetOptions != rhs.MatchSetOptions {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-pol:match-community-set.
-// Match a referenced community-set according to the logic
-// defined in the match-set-options leaf.
-type MatchCommunitySet struct {
-	// original -> bgp-pol:community-set
-	// References a defined community set.
-	CommunitySet string `mapstructure:"community-set" json:"community-set,omitempty"`
-	// original -> rpol:match-set-options
-	// Optional parameter that governs the behaviour of the
-	// match operation.
-	MatchSetOptions MatchSetOptionsType `mapstructure:"match-set-options" json:"match-set-options,omitempty"`
-}
-
-func (lhs *MatchCommunitySet) Equal(rhs *MatchCommunitySet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.CommunitySet != rhs.CommunitySet {
-		return false
-	}
-	if lhs.MatchSetOptions != rhs.MatchSetOptions {
-		return false
-	}
-	return true
-}
-
-// struct for container bgp-pol:bgp-conditions.
-// Policy conditions for matching
-// BGP-specific defined sets or comparing BGP-specific
-// attributes.
-type BgpConditions struct {
-	// original -> bgp-pol:match-community-set
-	// Match a referenced community-set according to the logic
-	// defined in the match-set-options leaf.
-	MatchCommunitySet MatchCommunitySet `mapstructure:"match-community-set" json:"match-community-set,omitempty"`
-	// original -> bgp-pol:match-ext-community-set
-	// Match a referenced extended community-set according to the
-	// logic defined in the match-set-options leaf.
-	MatchExtCommunitySet MatchExtCommunitySet `mapstructure:"match-ext-community-set" json:"match-ext-community-set,omitempty"`
-	// original -> bgp-pol:match-as-path-set
-	// Match a referenced as-path set according to the logic
-	// defined in the match-set-options leaf.
-	MatchAsPathSet MatchAsPathSet `mapstructure:"match-as-path-set" json:"match-as-path-set,omitempty"`
-	// original -> bgp-pol:med-eq
-	// Condition to check if the received MED value is equal to
-	// the specified value.
-	MedEq uint32 `mapstructure:"med-eq" json:"med-eq,omitempty"`
-	// original -> bgp-pol:origin-eq
-	// Condition to check if the route origin is equal to the
-	// specified value.
-	OriginEq BgpOriginAttrType `mapstructure:"origin-eq" json:"origin-eq,omitempty"`
-	// original -> bgp-pol:next-hop-in
-	// original type is list of inet:ip-address
-	// List of next hop addresses to check for in the route
-	// update.
-	NextHopInList []string `mapstructure:"next-hop-in-list" json:"next-hop-in-list,omitempty"`
-	// original -> bgp-pol:afi-safi-in
-	// List of address families which the NLRI may be
-	// within.
-	AfiSafiInList []AfiSafiType `mapstructure:"afi-safi-in-list" json:"afi-safi-in-list,omitempty"`
-	// original -> bgp-pol:local-pref-eq
-	// Condition to check if the local pref attribute is equal to
-	// the specified value.
-	LocalPrefEq uint32 `mapstructure:"local-pref-eq" json:"local-pref-eq,omitempty"`
-	// original -> bgp-pol:community-count
-	// Value and comparison operations for conditions based on the
-	// number of communities in the route update.
-	CommunityCount CommunityCount `mapstructure:"community-count" json:"community-count,omitempty"`
-	// original -> bgp-pol:as-path-length
-	// Value and comparison operations for conditions based on the
-	// length of the AS path in the route update.
-	AsPathLength AsPathLength `mapstructure:"as-path-length" json:"as-path-length,omitempty"`
-	// original -> bgp-pol:route-type
-	// Condition to check the route type in the route update.
-	RouteType RouteType `mapstructure:"route-type" json:"route-type,omitempty"`
-	// original -> gobgp:rpki-validation-result
-	// specify the validation result of RPKI based on ROA as conditions.
-	RpkiValidationResult RpkiValidationResultType `mapstructure:"rpki-validation-result" json:"rpki-validation-result,omitempty"`
-	// original -> gobgp:match-large-community-set
-	MatchLargeCommunitySet MatchLargeCommunitySet `mapstructure:"match-large-community-set" json:"match-large-community-set,omitempty"`
-}
-
-func (lhs *BgpConditions) Equal(rhs *BgpConditions) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.MatchCommunitySet.Equal(&(rhs.MatchCommunitySet)) {
-		return false
-	}
-	if !lhs.MatchExtCommunitySet.Equal(&(rhs.MatchExtCommunitySet)) {
-		return false
-	}
-	if !lhs.MatchAsPathSet.Equal(&(rhs.MatchAsPathSet)) {
-		return false
-	}
-	if lhs.MedEq != rhs.MedEq {
-		return false
-	}
-	if lhs.OriginEq != rhs.OriginEq {
-		return false
-	}
-	if len(lhs.NextHopInList) != len(rhs.NextHopInList) {
-		return false
-	}
-	for idx, l := range lhs.NextHopInList {
-		if l != rhs.NextHopInList[idx] {
-			return false
-		}
-	}
-	if len(lhs.AfiSafiInList) != len(rhs.AfiSafiInList) {
-		return false
-	}
-	for idx, l := range lhs.AfiSafiInList {
-		if l != rhs.AfiSafiInList[idx] {
-			return false
-		}
-	}
-	if lhs.LocalPrefEq != rhs.LocalPrefEq {
-		return false
-	}
-	if !lhs.CommunityCount.Equal(&(rhs.CommunityCount)) {
-		return false
-	}
-	if !lhs.AsPathLength.Equal(&(rhs.AsPathLength)) {
-		return false
-	}
-	if lhs.RouteType != rhs.RouteType {
-		return false
-	}
-	if lhs.RpkiValidationResult != rhs.RpkiValidationResult {
-		return false
-	}
-	if !lhs.MatchLargeCommunitySet.Equal(&(rhs.MatchLargeCommunitySet)) {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:igp-conditions.
-// Policy conditions for IGP attributes.
-type IgpConditions struct {
-}
-
-func (lhs *IgpConditions) Equal(rhs *IgpConditions) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:match-tag-set.
-// Match a referenced tag set according to the logic defined
-// in the match-options-set leaf.
-type MatchTagSet struct {
-	// original -> rpol:tag-set
-	// References a defined tag set.
-	TagSet string `mapstructure:"tag-set" json:"tag-set,omitempty"`
-	// original -> rpol:match-set-options
-	// Optional parameter that governs the behaviour of the
-	// match operation.  This leaf only supports matching on ANY
-	// member of the set or inverting the match.  Matching on ALL is
-	// not supported).
-	MatchSetOptions MatchSetOptionsRestrictedType `mapstructure:"match-set-options" json:"match-set-options,omitempty"`
-}
-
-func (lhs *MatchTagSet) Equal(rhs *MatchTagSet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.TagSet != rhs.TagSet {
-		return false
-	}
-	if lhs.MatchSetOptions != rhs.MatchSetOptions {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:match-neighbor-set.
-// Match a referenced neighbor set according to the logic
-// defined in the match-set-options-leaf.
-type MatchNeighborSet struct {
-	// original -> rpol:neighbor-set
-	// References a defined neighbor set.
-	NeighborSet string `mapstructure:"neighbor-set" json:"neighbor-set,omitempty"`
-	// original -> rpol:match-set-options
-	// Optional parameter that governs the behaviour of the
-	// match operation.  This leaf only supports matching on ANY
-	// member of the set or inverting the match.  Matching on ALL is
-	// not supported).
-	MatchSetOptions MatchSetOptionsRestrictedType `mapstructure:"match-set-options" json:"match-set-options,omitempty"`
-}
-
-func (lhs *MatchNeighborSet) Equal(rhs *MatchNeighborSet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.NeighborSet != rhs.NeighborSet {
-		return false
-	}
-	if lhs.MatchSetOptions != rhs.MatchSetOptions {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:match-prefix-set.
-// Match a referenced prefix-set according to the logic
-// defined in the match-set-options leaf.
-type MatchPrefixSet struct {
-	// original -> rpol:prefix-set
-	// References a defined prefix set.
-	PrefixSet string `mapstructure:"prefix-set" json:"prefix-set,omitempty"`
-	// original -> rpol:match-set-options
-	// Optional parameter that governs the behaviour of the
-	// match operation.  This leaf only supports matching on ANY
-	// member of the set or inverting the match.  Matching on ALL is
-	// not supported).
-	MatchSetOptions MatchSetOptionsRestrictedType `mapstructure:"match-set-options" json:"match-set-options,omitempty"`
-}
-
-func (lhs *MatchPrefixSet) Equal(rhs *MatchPrefixSet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.PrefixSet != rhs.PrefixSet {
-		return false
-	}
-	if lhs.MatchSetOptions != rhs.MatchSetOptions {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:conditions.
-// Condition statements for this
-// policy statement.
-type Conditions struct {
-	// original -> rpol:call-policy
-	// Applies the statements from the specified policy
-	// definition and then returns control the current
-	// policy statement. Note that the called policy may
-	// itself call other policies (subject to
-	// implementation limitations). This is intended to
-	// provide a policy 'subroutine' capability.  The
-	// called policy should contain an explicit or a
-	// default route disposition that returns an
-	// effective true (accept-route) or false
-	// (reject-route), otherwise the behavior may be
-	// ambiguous and implementation dependent.
-	CallPolicy string `mapstructure:"call-policy" json:"call-policy,omitempty"`
-	// original -> rpol:match-prefix-set
-	// Match a referenced prefix-set according to the logic
-	// defined in the match-set-options leaf.
-	MatchPrefixSet MatchPrefixSet `mapstructure:"match-prefix-set" json:"match-prefix-set,omitempty"`
-	// original -> rpol:match-neighbor-set
-	// Match a referenced neighbor set according to the logic
-	// defined in the match-set-options-leaf.
-	MatchNeighborSet MatchNeighborSet `mapstructure:"match-neighbor-set" json:"match-neighbor-set,omitempty"`
-	// original -> rpol:match-tag-set
-	// Match a referenced tag set according to the logic defined
-	// in the match-options-set leaf.
-	MatchTagSet MatchTagSet `mapstructure:"match-tag-set" json:"match-tag-set,omitempty"`
-	// original -> rpol:install-protocol-eq
-	// Condition to check the protocol / method used to install
-	// which installed the route into the local routing table.
-	InstallProtocolEq InstallProtocolType `mapstructure:"install-protocol-eq" json:"install-protocol-eq,omitempty"`
-	// original -> rpol:igp-conditions
-	// Policy conditions for IGP attributes.
-	IgpConditions IgpConditions `mapstructure:"igp-conditions" json:"igp-conditions,omitempty"`
-	// original -> bgp-pol:bgp-conditions
-	// Policy conditions for matching
-	// BGP-specific defined sets or comparing BGP-specific
-	// attributes.
-	BgpConditions BgpConditions `mapstructure:"bgp-conditions" json:"bgp-conditions,omitempty"`
-}
-
-func (lhs *Conditions) Equal(rhs *Conditions) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.CallPolicy != rhs.CallPolicy {
-		return false
-	}
-	if !lhs.MatchPrefixSet.Equal(&(rhs.MatchPrefixSet)) {
-		return false
-	}
-	if !lhs.MatchNeighborSet.Equal(&(rhs.MatchNeighborSet)) {
-		return false
-	}
-	if !lhs.MatchTagSet.Equal(&(rhs.MatchTagSet)) {
-		return false
-	}
-	if lhs.InstallProtocolEq != rhs.InstallProtocolEq {
-		return false
-	}
-	if !lhs.IgpConditions.Equal(&(rhs.IgpConditions)) {
-		return false
-	}
-	if !lhs.BgpConditions.Equal(&(rhs.BgpConditions)) {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:statement.
-// Policy statements group conditions and actions
-// within a policy definition.  They are evaluated in
-// the order specified (see the description of policy
-// evaluation at the top of this module.
-type Statement struct {
-	// original -> rpol:name
-	// name of the policy statement.
-	Name string `mapstructure:"name" json:"name,omitempty"`
-	// original -> rpol:conditions
-	// Condition statements for this
-	// policy statement.
-	Conditions Conditions `mapstructure:"conditions" json:"conditions,omitempty"`
-	// original -> rpol:actions
-	// Action statements for this policy
-	// statement.
-	Actions Actions `mapstructure:"actions" json:"actions,omitempty"`
-}
-
-func (lhs *Statement) Equal(rhs *Statement) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Name != rhs.Name {
-		return false
-	}
-	if !lhs.Conditions.Equal(&(rhs.Conditions)) {
-		return false
-	}
-	if !lhs.Actions.Equal(&(rhs.Actions)) {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:policy-definition.
-// List of top-level policy definitions, keyed by unique
-// name.  These policy definitions are expected to be
-// referenced (by name) in policy chains specified in import
-// or export configuration statements.
-type PolicyDefinition struct {
-	// original -> rpol:name
-	// Name of the top-level policy definition -- this name
-	//  is used in references to the current policy.
-	Name string `mapstructure:"name" json:"name,omitempty"`
-	// original -> rpol:statements
-	// Enclosing container for policy statements.
-	Statements []Statement `mapstructure:"statements" json:"statements,omitempty"`
-}
-
-func (lhs *PolicyDefinition) Equal(rhs *PolicyDefinition) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Name != rhs.Name {
-		return false
-	}
-	if len(lhs.Statements) != len(rhs.Statements) {
-		return false
-	}
-	{
-		lmap := make(map[string]*Statement)
-		for i, l := range lhs.Statements {
-			lmap[mapkey(i, string(l.Name))] = &lhs.Statements[i]
-		}
-		for i, r := range rhs.Statements {
-			if l, y := lmap[mapkey(i, string(r.Name))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-// struct for container gobgp:large-community-set.
-type LargeCommunitySet struct {
-	// original -> gobgp:large-community-set-name
-	LargeCommunitySetName string `mapstructure:"large-community-set-name" json:"large-community-set-name,omitempty"`
-	// original -> gobgp:large-community
-	// extended community set member.
-	LargeCommunityList []string `mapstructure:"large-community-list" json:"large-community-list,omitempty"`
-}
-
-func (lhs *LargeCommunitySet) Equal(rhs *LargeCommunitySet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.LargeCommunitySetName != rhs.LargeCommunitySetName {
-		return false
-	}
-	if len(lhs.LargeCommunityList) != len(rhs.LargeCommunityList) {
-		return false
-	}
-	for idx, l := range lhs.LargeCommunityList {
-		if l != rhs.LargeCommunityList[idx] {
-			return false
-		}
-	}
-	return true
-}
-
-// struct for container bgp-pol:as-path-set.
-// Definitions for AS path sets.
-type AsPathSet struct {
-	// original -> bgp-pol:as-path-set-name
-	// name of the AS path set -- this is used to reference
-	// the set in match conditions.
-	AsPathSetName string `mapstructure:"as-path-set-name" json:"as-path-set-name,omitempty"`
-	// original -> gobgp:as-path
-	// AS path expression.
-	AsPathList []string `mapstructure:"as-path-list" json:"as-path-list,omitempty"`
-}
-
-func (lhs *AsPathSet) Equal(rhs *AsPathSet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.AsPathSetName != rhs.AsPathSetName {
-		return false
-	}
-	if len(lhs.AsPathList) != len(rhs.AsPathList) {
-		return false
-	}
-	for idx, l := range lhs.AsPathList {
-		if l != rhs.AsPathList[idx] {
-			return false
-		}
-	}
-	return true
-}
-
-// struct for container bgp-pol:ext-community-set.
-// Definitions for extended community sets.
-type ExtCommunitySet struct {
-	// original -> bgp-pol:ext-community-set-name
-	// name / label of the extended community set -- this is
-	// used to reference the set in match conditions.
-	ExtCommunitySetName string `mapstructure:"ext-community-set-name" json:"ext-community-set-name,omitempty"`
-	// original -> gobgp:ext-community
-	// extended community set member.
-	ExtCommunityList []string `mapstructure:"ext-community-list" json:"ext-community-list,omitempty"`
-}
-
-func (lhs *ExtCommunitySet) Equal(rhs *ExtCommunitySet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.ExtCommunitySetName != rhs.ExtCommunitySetName {
-		return false
-	}
-	if len(lhs.ExtCommunityList) != len(rhs.ExtCommunityList) {
-		return false
-	}
-	for idx, l := range lhs.ExtCommunityList {
-		if l != rhs.ExtCommunityList[idx] {
-			return false
-		}
-	}
-	return true
-}
-
-// struct for container bgp-pol:community-set.
-// Definitions for community sets.
-type CommunitySet struct {
-	// original -> bgp-pol:community-set-name
-	// name / label of the community set -- this is used to
-	// reference the set in match conditions.
-	CommunitySetName string `mapstructure:"community-set-name" json:"community-set-name,omitempty"`
-	// original -> gobgp:community
-	// community set member.
-	CommunityList []string `mapstructure:"community-list" json:"community-list,omitempty"`
-}
-
-func (lhs *CommunitySet) Equal(rhs *CommunitySet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.CommunitySetName != rhs.CommunitySetName {
-		return false
-	}
-	if len(lhs.CommunityList) != len(rhs.CommunityList) {
-		return false
-	}
-	for idx, l := range lhs.CommunityList {
-		if l != rhs.CommunityList[idx] {
-			return false
-		}
-	}
-	return true
-}
-
-// struct for container bgp-pol:bgp-defined-sets.
-// BGP-related set definitions for policy match conditions.
-type BgpDefinedSets struct {
-	// original -> bgp-pol:community-sets
-	// Enclosing container for community sets.
-	CommunitySets []CommunitySet `mapstructure:"community-sets" json:"community-sets,omitempty"`
-	// original -> bgp-pol:ext-community-sets
-	// Enclosing container for extended community sets.
-	ExtCommunitySets []ExtCommunitySet `mapstructure:"ext-community-sets" json:"ext-community-sets,omitempty"`
-	// original -> bgp-pol:as-path-sets
-	// Enclosing container for AS path sets.
-	AsPathSets []AsPathSet `mapstructure:"as-path-sets" json:"as-path-sets,omitempty"`
-	// original -> gobgp:large-community-sets
-	LargeCommunitySets []LargeCommunitySet `mapstructure:"large-community-sets" json:"large-community-sets,omitempty"`
-}
-
-func (lhs *BgpDefinedSets) Equal(rhs *BgpDefinedSets) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if len(lhs.CommunitySets) != len(rhs.CommunitySets) {
-		return false
-	}
-	{
-		lmap := make(map[string]*CommunitySet)
-		for i, l := range lhs.CommunitySets {
-			lmap[mapkey(i, string(l.CommunitySetName))] = &lhs.CommunitySets[i]
-		}
-		for i, r := range rhs.CommunitySets {
-			if l, y := lmap[mapkey(i, string(r.CommunitySetName))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if len(lhs.ExtCommunitySets) != len(rhs.ExtCommunitySets) {
-		return false
-	}
-	{
-		lmap := make(map[string]*ExtCommunitySet)
-		for i, l := range lhs.ExtCommunitySets {
-			lmap[mapkey(i, string(l.ExtCommunitySetName))] = &lhs.ExtCommunitySets[i]
-		}
-		for i, r := range rhs.ExtCommunitySets {
-			if l, y := lmap[mapkey(i, string(r.ExtCommunitySetName))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if len(lhs.AsPathSets) != len(rhs.AsPathSets) {
-		return false
-	}
-	{
-		lmap := make(map[string]*AsPathSet)
-		for i, l := range lhs.AsPathSets {
-			lmap[mapkey(i, string(l.AsPathSetName))] = &lhs.AsPathSets[i]
-		}
-		for i, r := range rhs.AsPathSets {
-			if l, y := lmap[mapkey(i, string(r.AsPathSetName))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if len(lhs.LargeCommunitySets) != len(rhs.LargeCommunitySets) {
-		return false
-	}
-	{
-		lmap := make(map[string]*LargeCommunitySet)
-		for i, l := range lhs.LargeCommunitySets {
-			lmap[mapkey(i, string(l.LargeCommunitySetName))] = &lhs.LargeCommunitySets[i]
-		}
-		for i, r := range rhs.LargeCommunitySets {
-			if l, y := lmap[mapkey(i, string(r.LargeCommunitySetName))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-// struct for container rpol:tag.
-// list of tags that are part of the tag set.
-type Tag struct {
-	// original -> rpol:value
-	// Value of the tag set member.
-	Value TagType `mapstructure:"value" json:"value,omitempty"`
-}
-
-func (lhs *Tag) Equal(rhs *Tag) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.Value != rhs.Value {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:tag-set.
-// Definitions for tag sets.
-type TagSet struct {
-	// original -> rpol:tag-set-name
-	// name / label of the tag set -- this is used to reference
-	// the set in match conditions.
-	TagSetName string `mapstructure:"tag-set-name" json:"tag-set-name,omitempty"`
-	// original -> rpol:tag
-	// list of tags that are part of the tag set.
-	TagList []Tag `mapstructure:"tag-list" json:"tag-list,omitempty"`
-}
-
-func (lhs *TagSet) Equal(rhs *TagSet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.TagSetName != rhs.TagSetName {
-		return false
-	}
-	if len(lhs.TagList) != len(rhs.TagList) {
-		return false
-	}
-	{
-		lmap := make(map[string]*Tag)
-		for i, l := range lhs.TagList {
-			lmap[mapkey(i, string(l.Value))] = &lhs.TagList[i]
-		}
-		for i, r := range rhs.TagList {
-			if l, y := lmap[mapkey(i, string(r.Value))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-// struct for container rpol:neighbor-set.
-// Definitions for neighbor sets.
-type NeighborSet struct {
-	// original -> rpol:neighbor-set-name
-	// name / label of the neighbor set -- this is used to
-	// reference the set in match conditions.
-	NeighborSetName string `mapstructure:"neighbor-set-name" json:"neighbor-set-name,omitempty"`
-	// original -> gobgp:neighbor-info
-	// original type is list of inet:ip-address
-	// neighbor ip address or prefix.
-	NeighborInfoList []string `mapstructure:"neighbor-info-list" json:"neighbor-info-list,omitempty"`
-}
-
-func (lhs *NeighborSet) Equal(rhs *NeighborSet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.NeighborSetName != rhs.NeighborSetName {
-		return false
-	}
-	if len(lhs.NeighborInfoList) != len(rhs.NeighborInfoList) {
-		return false
-	}
-	for idx, l := range lhs.NeighborInfoList {
-		if l != rhs.NeighborInfoList[idx] {
-			return false
-		}
-	}
-	return true
-}
-
-// struct for container rpol:prefix.
-// List of prefix expressions that are part of the set.
-type Prefix struct {
-	// original -> rpol:ip-prefix
-	// rpol:ip-prefix's original type is inet:ip-prefix.
-	// The prefix member in CIDR notation -- while the
-	// prefix may be either IPv4 or IPv6, most
-	// implementations require all members of the prefix set
-	// to be the same address family.  Mixing address types in
-	// the same prefix set is likely to cause an error.
-	IpPrefix string `mapstructure:"ip-prefix" json:"ip-prefix,omitempty"`
-	// original -> rpol:masklength-range
-	// Defines a range for the masklength, or 'exact' if
-	// the prefix has an exact length.
-	//
-	// Example: 10.3.192.0/21 through 10.3.192.0/24 would be
-	// expressed as prefix: 10.3.192.0/21,
-	// masklength-range: 21..24.
-	//
-	// Example: 10.3.192.0/21 would be expressed as
-	// prefix: 10.3.192.0/21,
-	// masklength-range: exact.
-	MasklengthRange string `mapstructure:"masklength-range" json:"masklength-range,omitempty"`
-}
-
-func (lhs *Prefix) Equal(rhs *Prefix) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.IpPrefix != rhs.IpPrefix {
-		return false
-	}
-	if lhs.MasklengthRange != rhs.MasklengthRange {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:prefix-set.
-// List of the defined prefix sets.
-type PrefixSet struct {
-	// original -> rpol:prefix-set-name
-	// name / label of the prefix set -- this is used to
-	// reference the set in match conditions.
-	PrefixSetName string `mapstructure:"prefix-set-name" json:"prefix-set-name,omitempty"`
-	// original -> rpol:prefix
-	// List of prefix expressions that are part of the set.
-	PrefixList []Prefix `mapstructure:"prefix-list" json:"prefix-list,omitempty"`
-}
-
-func (lhs *PrefixSet) Equal(rhs *PrefixSet) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if lhs.PrefixSetName != rhs.PrefixSetName {
-		return false
-	}
-	if len(lhs.PrefixList) != len(rhs.PrefixList) {
-		return false
-	}
-	{
-		lmap := make(map[string]*Prefix)
-		for i, l := range lhs.PrefixList {
-			lmap[mapkey(i, string(l.IpPrefix+l.MasklengthRange))] = &lhs.PrefixList[i]
-		}
-		for i, r := range rhs.PrefixList {
-			if l, y := lmap[mapkey(i, string(r.IpPrefix+r.MasklengthRange))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-// struct for container rpol:defined-sets.
-// Predefined sets of attributes used in policy match
-// statements.
-type DefinedSets struct {
-	// original -> rpol:prefix-sets
-	// Enclosing container for defined prefix sets for matching.
-	PrefixSets []PrefixSet `mapstructure:"prefix-sets" json:"prefix-sets,omitempty"`
-	// original -> rpol:neighbor-sets
-	// Enclosing container for defined neighbor sets for matching.
-	NeighborSets []NeighborSet `mapstructure:"neighbor-sets" json:"neighbor-sets,omitempty"`
-	// original -> rpol:tag-sets
-	// Enclosing container for defined tag sets for matching.
-	TagSets []TagSet `mapstructure:"tag-sets" json:"tag-sets,omitempty"`
-	// original -> bgp-pol:bgp-defined-sets
-	// BGP-related set definitions for policy match conditions.
-	BgpDefinedSets BgpDefinedSets `mapstructure:"bgp-defined-sets" json:"bgp-defined-sets,omitempty"`
-}
-
-func (lhs *DefinedSets) Equal(rhs *DefinedSets) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if len(lhs.PrefixSets) != len(rhs.PrefixSets) {
-		return false
-	}
-	{
-		lmap := make(map[string]*PrefixSet)
-		for i, l := range lhs.PrefixSets {
-			lmap[mapkey(i, string(l.PrefixSetName))] = &lhs.PrefixSets[i]
-		}
-		for i, r := range rhs.PrefixSets {
-			if l, y := lmap[mapkey(i, string(r.PrefixSetName))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if len(lhs.NeighborSets) != len(rhs.NeighborSets) {
-		return false
-	}
-	{
-		lmap := make(map[string]*NeighborSet)
-		for i, l := range lhs.NeighborSets {
-			lmap[mapkey(i, string(l.NeighborSetName))] = &lhs.NeighborSets[i]
-		}
-		for i, r := range rhs.NeighborSets {
-			if l, y := lmap[mapkey(i, string(r.NeighborSetName))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if len(lhs.TagSets) != len(rhs.TagSets) {
-		return false
-	}
-	{
-		lmap := make(map[string]*TagSet)
-		for i, l := range lhs.TagSets {
-			lmap[mapkey(i, string(l.TagSetName))] = &lhs.TagSets[i]
-		}
-		for i, r := range rhs.TagSets {
-			if l, y := lmap[mapkey(i, string(r.TagSetName))]; !y {
-				return false
-			} else if !r.Equal(l) {
-				return false
-			}
-		}
-	}
-	if !lhs.BgpDefinedSets.Equal(&(rhs.BgpDefinedSets)) {
-		return false
-	}
-	return true
-}
-
-// struct for container rpol:routing-policy.
-// top-level container for all routing policy configuration.
-type RoutingPolicy struct {
-	// original -> rpol:defined-sets
-	// Predefined sets of attributes used in policy match
-	// statements.
-	DefinedSets DefinedSets `mapstructure:"defined-sets" json:"defined-sets,omitempty"`
-	// original -> rpol:policy-definitions
-	// Enclosing container for the list of top-level policy
-	// definitions.
-	PolicyDefinitions []PolicyDefinition `mapstructure:"policy-definitions" json:"policy-definitions,omitempty"`
-}
-
-func (lhs *RoutingPolicy) Equal(rhs *RoutingPolicy) bool {
-	if lhs == nil || rhs == nil {
-		return false
-	}
-	if !lhs.DefinedSets.Equal(&(rhs.DefinedSets)) {
-		return false
-	}
-	if len(lhs.PolicyDefinitions) != len(rhs.PolicyDefinitions) {
-		return false
-	}
-	{
-		lmap := make(map[string]*PolicyDefinition)
-		for i, l := range lhs.PolicyDefinitions {
-			lmap[mapkey(i, string(l.Name))] = &lhs.PolicyDefinitions[i]
-		}
-		for i, r := range rhs.PolicyDefinitions {
-			if l, y := lmap[mapkey(i, string(r.Name))]; !y {
+		for i, r := range rhs.Peers {
+			if l, y := lmap[mapkey(i, string(r.Config.PeerAddress))]; !y {
 				return false
 			} else if !r.Equal(l) {
 				return false

@@ -45,7 +45,6 @@ var opts struct {
 	GrpcHosts     string `long:"api-hosts" description:"specify the hosts that sbgpd listens on" default:":50051"`
 	PProfHost     string `long:"pprof-host" description:"specify the host that sbgpd listens on for pprof" default:"localhost:6060"`
 	PProfDisable  bool   `long:"pprof-disable" description:"disable pprof profiling"`
-	UseSdNotify   bool   `long:"sdnotify" description:"use sd_notify protocol"`
 	TLS           bool   `long:"tls" description:"enable TLS authentication for gRPC API"`
 	TLSCertFile   string `long:"tls-cert-file" description:"The TLS cert file"`
 	TLSKeyFile    string `long:"tls-key-file" description:"The TLS key file"`
@@ -95,12 +94,6 @@ func main() {
 	s := server.NewBgpServer(server.GrpcListenAddress(opts.GrpcHosts), server.GrpcOption(grpcOpts), server.LoggerOption(&builtinLogger{logger: logger}))
 	go s.Serve()
 	defer s.Stop()
-
-	if opts.ConfigFile == "" {
-		<-sigCh
-		stopServer(s, opts.UseSdNotify)
-		return
-	}
 
 	if opts.ConfigFile != "" {
 		signal.Notify(sigCh, syscall.SIGHUP)

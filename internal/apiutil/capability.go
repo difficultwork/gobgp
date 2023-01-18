@@ -116,6 +116,14 @@ func NewFQDNCapability(a *bgp.CapFQDN) *api.FqdnCapability {
 	}
 }
 
+// XRDP
+func NewRDPCapability(a *bgp.CapRDP) *api.RDPCapability {
+	return &api.RDPCapability{
+		Family: ToApiFamily(a.AFI, uint8(a.SAFI)),
+		Flags:  uint32(a.Flags),
+	}
+}
+
 func NewUnknownCapability(a *bgp.CapUnknown) *api.UnknownCapability {
 	return &api.UnknownCapability{
 		Code:  uint32(a.CapCode),
@@ -150,6 +158,8 @@ func MarshalCapability(value bgp.ParameterCapabilityInterface) (*apb.Any, error)
 		m = NewFQDNCapability(n)
 	case *bgp.CapUnknown:
 		m = NewUnknownCapability(n)
+	case *bgp.CapRDP: // XRDP
+		m = NewRDPCapability(n)
 	default:
 		return nil, fmt.Errorf("invalid capability type to marshal: %+v", value)
 	}

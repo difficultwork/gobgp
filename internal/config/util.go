@@ -18,7 +18,6 @@ package config
 import (
 	"fmt"
 	"net"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -30,21 +29,6 @@ import (
 	"github.com/osrg/gobgp/v3/pkg/apiutil"
 	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
 )
-
-// Returns config file type by retrieving extension from the given path.
-// If no corresponding type found, returns the given def as the default value.
-func detectConfigFileType(path, def string) string {
-	switch ext := filepath.Ext(path); ext {
-	case ".toml":
-		return "toml"
-	case ".yaml", ".yml":
-		return "yaml"
-	case ".json":
-		return "json"
-	default:
-		return def
-	}
-}
 
 // yaml is decoded as []interface{}
 // but toml is decoded as []map[string]interface{}.
@@ -87,53 +71,11 @@ func getIPv6LinkLocalAddress(ifname string) (string, error) {
 	return "", fmt.Errorf("no ipv6 link local address for %s", ifname)
 }
 
-func (b *BgpConfigSet) getPeerGroup(n string) (*PeerGroup, error) {
-	if n == "" {
-		return nil, nil
-	}
-	for _, pg := range b.PeerGroups {
-		if n == pg.Config.PeerGroupName {
-			return &pg, nil
-		}
-	}
-	return nil, fmt.Errorf("no such peer-group: %s", n)
-}
-
-func (d *DynamicNeighbor) validate(b *BgpConfigSet) error {
-	if d.Config.PeerGroup == "" {
-		return fmt.Errorf("dynamic neighbor requires the peer group config")
-	}
-
-	if _, err := b.getPeerGroup(d.Config.PeerGroup); err != nil {
-		return err
-	}
-	if _, _, err := net.ParseCIDR(d.Config.Prefix); err != nil {
-		return fmt.Errorf("invalid dynamic neighbor prefix %s", d.Config.Prefix)
-	}
-	return nil
-}
-
-func (n *Neighbor) IsConfederationMember(g *Global) bool {
-	for _, member := range g.Confederation.Config.MemberAsList {
-		if member == n.Config.PeerAs {
-			return true
-		}
-	}
-	return false
-}
-
-func (n *Neighbor) IsConfederation(g *Global) bool {
-	if n.Config.PeerAs == g.Config.As {
-		return true
-	}
-	return n.IsConfederationMember(g)
-}
-
-func (n *Neighbor) IsEBGPPeer(g *Global) bool {
+func (n *Peer) IsEBGPPeer(g *Global) bool {
 	return n.Config.PeerAs != n.Config.LocalAs
 }
 
-func (n *Neighbor) CreateRfMap() map[bgp.RouteFamily]bgp.BGPAddPathMode {
+func (n *Peer) CreateRfMap() map[bgp.RouteFamily]bgp.BGPAddPathMode {
 	rfMap := make(map[bgp.RouteFamily]bgp.BGPAddPathMode)
 	for _, af := range n.AfiSafis {
 		mode := bgp.BGP_ADD_PATH_NONE
@@ -148,7 +90,7 @@ func (n *Neighbor) CreateRfMap() map[bgp.RouteFamily]bgp.BGPAddPathMode {
 	return rfMap
 }
 
-func (n *Neighbor) GetAfiSafi(family bgp.RouteFamily) *AfiSafi {
+func (n *Peer) GetAfiSafi(family bgp.RouteFamily) *AfiSafi {
 	for _, a := range n.AfiSafis {
 		if string(a.Config.AfiSafiName) == family.String() {
 			return &a
@@ -157,18 +99,18 @@ func (n *Neighbor) GetAfiSafi(family bgp.RouteFamily) *AfiSafi {
 	return nil
 }
 
-func (n *Neighbor) ExtractNeighborAddress() (string, error) {
-	addr := n.State.NeighborAddress
+func (n *Peer) ExtractNeighborAddress() (string, error) {
+	addr := n.State.PeerAddress
 	if addr == "" {
-		addr = n.Config.NeighborAddress
+		addr = n.Config.PeerAddress
 		if addr == "" {
-			return "", fmt.Errorf("NeighborAddress is not configured")
+			return "", fmt.Errorf("PeerAddress is not configured")
 		}
 	}
 	return addr, nil
 }
 
-func (n *Neighbor) IsAddPathReceiveEnabled(family bgp.RouteFamily) bool {
+func (n *Peer) IsAddPathReceiveEnabled(family bgp.RouteFamily) bool {
 	for _, af := range n.AfiSafis {
 		if af.State.Family == family {
 			return af.AddPaths.State.Receive
@@ -187,18 +129,9 @@ func (c AfiSafis) ToRfList() ([]bgp.RouteFamily, error) {
 	return rfs, nil
 }
 
-func inSlice(n Neighbor, b []Neighbor) int {
+func inSlice(n Peer, b []Peer) int {
 	for i, nb := range b {
-		if nb.State.NeighborAddress == n.State.NeighborAddress {
-			return i
-		}
-	}
-	return -1
-}
-
-func existPeerGroup(n string, b []PeerGroup) int {
-	for i, nb := range b {
-		if nb.Config.PeerGroupName == n {
+		if nb.State.PeerAddress == n.State.PeerAddress {
 			return i
 		}
 	}
@@ -221,12 +154,11 @@ func isAfiSafiChanged(x, y []AfiSafi) bool {
 	return false
 }
 
-func (n *Neighbor) NeedsResendOpenMessage(new *Neighbor) bool {
+func (n *Peer) NeedsResendOpenMessage(new *Peer) bool {
 	return !n.Config.Equal(&new.Config) ||
 		!n.Transport.Config.Equal(&new.Transport.Config) ||
 		!n.AddPaths.Config.Equal(&new.AddPaths.Config) ||
 		!n.AsPathOptions.Config.Equal(&new.AsPathOptions.Config) ||
-		!n.GracefulRestart.Config.Equal(&new.GracefulRestart.Config) ||
 		isAfiSafiChanged(n.AfiSafis, new.AfiSafis)
 }
 
@@ -298,61 +230,10 @@ func newAfiSafiConfigFromConfigStruct(c *AfiSafi) *api.AfiSafiConfig {
 	}
 }
 
-func newApplyPolicyFromConfigStruct(c *ApplyPolicy) *api.ApplyPolicy {
-	f := func(t DefaultPolicyType) api.RouteAction {
-		if t == DEFAULT_POLICY_TYPE_ACCEPT_ROUTE {
-			return api.RouteAction_ACCEPT
-		} else if t == DEFAULT_POLICY_TYPE_REJECT_ROUTE {
-			return api.RouteAction_REJECT
-		}
-		return api.RouteAction_NONE
-	}
-	applyPolicy := &api.ApplyPolicy{
-		ImportPolicy: &api.PolicyAssignment{
-			Direction:     api.PolicyDirection_IMPORT,
-			DefaultAction: f(c.Config.DefaultImportPolicy),
-		},
-		ExportPolicy: &api.PolicyAssignment{
-			Direction:     api.PolicyDirection_EXPORT,
-			DefaultAction: f(c.Config.DefaultExportPolicy),
-		},
-	}
-
-	for _, pname := range c.Config.ImportPolicyList {
-		applyPolicy.ImportPolicy.Policies = append(applyPolicy.ImportPolicy.Policies, &api.Policy{Name: pname})
-	}
-	for _, pname := range c.Config.ExportPolicyList {
-		applyPolicy.ExportPolicy.Policies = append(applyPolicy.ExportPolicy.Policies, &api.Policy{Name: pname})
-	}
-
-	return applyPolicy
-}
-
-func newPrefixLimitFromConfigStruct(c *AfiSafi) *api.PrefixLimit {
-	if c.PrefixLimit.Config.MaxPrefixes == 0 {
-		return nil
-	}
-	afi, safi := bgp.RouteFamilyToAfiSafi(bgp.RouteFamily(c.State.Family))
-	return &api.PrefixLimit{
-		Family:               &api.Family{Afi: api.Family_Afi(afi), Safi: api.Family_Safi(safi)},
-		MaxPrefixes:          c.PrefixLimit.Config.MaxPrefixes,
-		ShutdownThresholdPct: uint32(c.PrefixLimit.Config.ShutdownThresholdPct),
-	}
-}
-
 func newRouteTargetMembershipFromConfigStruct(c *RouteTargetMembership) *api.RouteTargetMembership {
 	return &api.RouteTargetMembership{
 		Config: &api.RouteTargetMembershipConfig{
 			DeferralTime: uint32(c.Config.DeferralTime),
-		},
-	}
-}
-
-func newLongLivedGracefulRestartFromConfigStruct(c *LongLivedGracefulRestart) *api.LongLivedGracefulRestart {
-	return &api.LongLivedGracefulRestart{
-		Config: &api.LongLivedGracefulRestartConfig{
-			Enabled:     c.Config.Enabled,
-			RestartTime: c.Config.RestartTime,
 		},
 	}
 }
@@ -362,34 +243,6 @@ func newAddPathsFromConfigStruct(c *AddPaths) *api.AddPaths {
 		Config: &api.AddPathsConfig{
 			Receive: c.Config.Receive,
 			SendMax: uint32(c.Config.SendMax),
-		},
-	}
-}
-
-func newRouteSelectionOptionsFromConfigStruct(c *RouteSelectionOptions) *api.RouteSelectionOptions {
-	return &api.RouteSelectionOptions{
-		Config: &api.RouteSelectionOptionsConfig{
-			AlwaysCompareMed:        c.Config.AlwaysCompareMed,
-			IgnoreAsPathLength:      c.Config.IgnoreAsPathLength,
-			ExternalCompareRouterId: c.Config.ExternalCompareRouterId,
-			AdvertiseInactiveRoutes: c.Config.AdvertiseInactiveRoutes,
-			EnableAigp:              c.Config.EnableAigp,
-			IgnoreNextHopIgpMetric:  c.Config.IgnoreNextHopIgpMetric,
-		},
-	}
-}
-
-func newMpGracefulRestartFromConfigStruct(c *MpGracefulRestart) *api.MpGracefulRestart {
-	return &api.MpGracefulRestart{
-		Config: &api.MpGracefulRestartConfig{
-			Enabled: c.Config.Enabled,
-		},
-		State: &api.MpGracefulRestartState{
-			Enabled:          c.State.Enabled,
-			Received:         c.State.Received,
-			Advertised:       c.State.Advertised,
-			EndOfRibReceived: c.State.EndOfRibReceived,
-			EndOfRibSent:     c.State.EndOfRibSent,
 		},
 	}
 }
@@ -415,15 +268,10 @@ func newUseMultiplePathsFromConfigStruct(c *UseMultiplePaths) *api.UseMultiplePa
 
 func newAfiSafiFromConfigStruct(c *AfiSafi) *api.AfiSafi {
 	return &api.AfiSafi{
-		MpGracefulRestart:        newMpGracefulRestartFromConfigStruct(&c.MpGracefulRestart),
-		Config:                   newAfiSafiConfigFromConfigStruct(c),
-		ApplyPolicy:              newApplyPolicyFromConfigStruct(&c.ApplyPolicy),
-		RouteSelectionOptions:    newRouteSelectionOptionsFromConfigStruct(&c.RouteSelectionOptions),
-		UseMultiplePaths:         newUseMultiplePathsFromConfigStruct(&c.UseMultiplePaths),
-		PrefixLimits:             newPrefixLimitFromConfigStruct(c),
-		RouteTargetMembership:    newRouteTargetMembershipFromConfigStruct(&c.RouteTargetMembership),
-		LongLivedGracefulRestart: newLongLivedGracefulRestartFromConfigStruct(&c.LongLivedGracefulRestart),
-		AddPaths:                 newAddPathsFromConfigStruct(&c.AddPaths),
+		Config:                newAfiSafiConfigFromConfigStruct(c),
+		UseMultiplePaths:      newUseMultiplePathsFromConfigStruct(&c.UseMultiplePaths),
+		RouteTargetMembership: newRouteTargetMembershipFromConfigStruct(&c.RouteTargetMembership),
+		AddPaths:              newAddPathsFromConfigStruct(&c.AddPaths),
 	}
 }
 
@@ -434,7 +282,7 @@ func ProtoTimestamp(secs int64) *tspb.Timestamp {
 	return tspb.New(time.Unix(secs, 0))
 }
 
-func NewPeerFromConfigStruct(pconf *Neighbor) *api.Peer {
+func NewPeerFromConfigStruct(pconf *Peer) *api.Peer {
 	afiSafis := make([]*api.AfiSafi, 0, len(pconf.AfiSafis))
 	for _, f := range pconf.AfiSafis {
 		if afiSafi := newAfiSafiFromConfigStruct(&f); afiSafi != nil {
@@ -464,26 +312,23 @@ func NewPeerFromConfigStruct(pconf *Neighbor) *api.Peer {
 		removePrivate = api.RemovePrivate_REPLACE
 	}
 	return &api.Peer{
-		ApplyPolicy: newApplyPolicyFromConfigStruct(&pconf.ApplyPolicy),
 		Conf: &api.PeerConf{
-			NeighborAddress:   pconf.Config.NeighborAddress,
+			NeighborAddress:   pconf.Config.PeerAddress,
 			PeerAsn:           pconf.Config.PeerAs,
 			LocalAsn:          pconf.Config.LocalAs,
 			Type:              api.PeerType(pconf.Config.PeerType.ToInt()),
 			AuthPassword:      pconf.Config.AuthPassword,
 			RouteFlapDamping:  pconf.Config.RouteFlapDamping,
 			Description:       pconf.Config.Description,
-			PeerGroup:         pconf.Config.PeerGroup,
-			NeighborInterface: pconf.Config.NeighborInterface,
+			NeighborInterface: pconf.Config.PeerInterface,
 			Vrf:               pconf.Config.Vrf,
 			AllowOwnAsn:       uint32(pconf.AsPathOptions.Config.AllowOwnAs),
 			RemovePrivate:     removePrivate,
 			ReplacePeerAsn:    pconf.AsPathOptions.Config.ReplacePeerAs,
-			AdminDown:         pconf.Config.AdminDown,
 		},
 		State: &api.PeerState{
 			SessionState: api.PeerState_SessionState(api.PeerState_SessionState_value[strings.ToUpper(string(s.SessionState))]),
-			AdminState:   api.PeerState_AdminState(s.AdminState.ToInt()),
+			AdminState:   api.PeerState_UP,
 			Messages: &api.Messages{
 				Received: &api.Message{
 					Notification:   s.Messages.Received.Notification,
@@ -508,7 +353,7 @@ func NewPeerFromConfigStruct(pconf *Neighbor) *api.Peer {
 			},
 			PeerAsn:         s.PeerAs,
 			Type:            api.PeerType(s.PeerType.ToInt()),
-			NeighborAddress: pconf.State.NeighborAddress,
+			NeighborAddress: pconf.State.PeerAddress,
 			Queues:          &api.Queues{},
 			RemoteCap:       remoteCap,
 			LocalCap:        localCap,
@@ -536,23 +381,6 @@ func NewPeerFromConfigStruct(pconf *Neighbor) *api.Peer {
 				Downtime:           ProtoTimestamp(timer.State.Downtime),
 			},
 		},
-		RouteReflector: &api.RouteReflector{
-			RouteReflectorClient:    pconf.RouteReflector.Config.RouteReflectorClient,
-			RouteReflectorClusterId: string(pconf.RouteReflector.State.RouteReflectorClusterId),
-		},
-		RouteServer: &api.RouteServer{
-			RouteServerClient: pconf.RouteServer.Config.RouteServerClient,
-			SecondaryRoute:    pconf.RouteServer.Config.SecondaryRoute,
-		},
-		GracefulRestart: &api.GracefulRestart{
-			Enabled:             pconf.GracefulRestart.Config.Enabled,
-			RestartTime:         uint32(pconf.GracefulRestart.Config.RestartTime),
-			HelperOnly:          pconf.GracefulRestart.Config.HelperOnly,
-			DeferralTime:        uint32(pconf.GracefulRestart.Config.DeferralTime),
-			NotificationEnabled: pconf.GracefulRestart.Config.NotificationEnabled,
-			LonglivedEnabled:    pconf.GracefulRestart.Config.LongLivedEnabled,
-			LocalRestarting:     pconf.GracefulRestart.State.LocalRestarting,
-		},
 		Transport: &api.Transport{
 			RemotePort:    uint32(pconf.Transport.Config.RemotePort),
 			LocalPort:     uint32(pconf.Transport.Config.LocalPort),
@@ -562,202 +390,4 @@ func NewPeerFromConfigStruct(pconf *Neighbor) *api.Peer {
 		},
 		AfiSafis: afiSafis,
 	}
-}
-
-func NewPeerGroupFromConfigStruct(pconf *PeerGroup) *api.PeerGroup {
-	afiSafis := make([]*api.AfiSafi, 0, len(pconf.AfiSafis))
-	for _, f := range pconf.AfiSafis {
-		if afiSafi := newAfiSafiFromConfigStruct(&f); afiSafi != nil {
-			afiSafi.AddPaths.Config.Receive = pconf.AddPaths.Config.Receive
-			afiSafi.AddPaths.Config.SendMax = uint32(pconf.AddPaths.Config.SendMax)
-			afiSafis = append(afiSafis, afiSafi)
-		}
-	}
-
-	timer := pconf.Timers
-	s := pconf.State
-	return &api.PeerGroup{
-		ApplyPolicy: newApplyPolicyFromConfigStruct(&pconf.ApplyPolicy),
-		Conf: &api.PeerGroupConf{
-			PeerAsn:          pconf.Config.PeerAs,
-			LocalAsn:         pconf.Config.LocalAs,
-			Type:             api.PeerType(pconf.Config.PeerType.ToInt()),
-			AuthPassword:     pconf.Config.AuthPassword,
-			RouteFlapDamping: pconf.Config.RouteFlapDamping,
-			Description:      pconf.Config.Description,
-			PeerGroupName:    pconf.Config.PeerGroupName,
-		},
-		Info: &api.PeerGroupState{
-			PeerAsn:       s.PeerAs,
-			Type:          api.PeerType(s.PeerType.ToInt()),
-			TotalPaths:    s.TotalPaths,
-			TotalPrefixes: s.TotalPrefixes,
-		},
-		EbgpMultihop: &api.EbgpMultihop{
-			Enabled:     pconf.EbgpMultihop.Config.Enabled,
-			MultihopTtl: uint32(pconf.EbgpMultihop.Config.MultihopTtl),
-		},
-		TtlSecurity: &api.TtlSecurity{
-			Enabled: pconf.TtlSecurity.Config.Enabled,
-			TtlMin:  uint32(pconf.TtlSecurity.Config.TtlMin),
-		},
-		Timers: &api.Timers{
-			Config: &api.TimersConfig{
-				ConnectRetry:           uint64(timer.Config.ConnectRetry),
-				HoldTime:               uint64(timer.Config.HoldTime),
-				KeepaliveInterval:      uint64(timer.Config.KeepaliveInterval),
-				IdleHoldTimeAfterReset: uint64(timer.Config.IdleHoldTimeAfterReset),
-			},
-			State: &api.TimersState{
-				KeepaliveInterval:  uint64(timer.State.KeepaliveInterval),
-				NegotiatedHoldTime: uint64(timer.State.NegotiatedHoldTime),
-				Uptime:             ProtoTimestamp(timer.State.Uptime),
-				Downtime:           ProtoTimestamp(timer.State.Downtime),
-			},
-		},
-		RouteReflector: &api.RouteReflector{
-			RouteReflectorClient:    pconf.RouteReflector.Config.RouteReflectorClient,
-			RouteReflectorClusterId: string(pconf.RouteReflector.Config.RouteReflectorClusterId),
-		},
-		RouteServer: &api.RouteServer{
-			RouteServerClient: pconf.RouteServer.Config.RouteServerClient,
-			SecondaryRoute:    pconf.RouteServer.Config.SecondaryRoute,
-		},
-		GracefulRestart: &api.GracefulRestart{
-			Enabled:             pconf.GracefulRestart.Config.Enabled,
-			RestartTime:         uint32(pconf.GracefulRestart.Config.RestartTime),
-			HelperOnly:          pconf.GracefulRestart.Config.HelperOnly,
-			DeferralTime:        uint32(pconf.GracefulRestart.Config.DeferralTime),
-			NotificationEnabled: pconf.GracefulRestart.Config.NotificationEnabled,
-			LonglivedEnabled:    pconf.GracefulRestart.Config.LongLivedEnabled,
-			LocalRestarting:     pconf.GracefulRestart.State.LocalRestarting,
-		},
-		Transport: &api.Transport{
-			RemotePort:   uint32(pconf.Transport.Config.RemotePort),
-			LocalAddress: pconf.Transport.Config.LocalAddress,
-			PassiveMode:  pconf.Transport.Config.PassiveMode,
-		},
-		AfiSafis: afiSafis,
-	}
-}
-
-func NewGlobalFromConfigStruct(c *Global) *api.Global {
-	families := make([]uint32, 0, len(c.AfiSafis))
-	for _, f := range c.AfiSafis {
-		families = append(families, uint32(AfiSafiTypeToIntMap[f.Config.AfiSafiName]))
-	}
-
-	applyPolicy := newApplyPolicyFromConfigStruct(&c.ApplyPolicy)
-
-	return &api.Global{
-		Asn:              c.Config.As,
-		RouterId:         c.Config.RouterId,
-		ListenPort:       c.Config.Port,
-		ListenAddresses:  c.Config.LocalAddressList,
-		Families:         families,
-		UseMultiplePaths: c.UseMultiplePaths.Config.Enabled,
-		RouteSelectionOptions: &api.RouteSelectionOptionsConfig{
-			AlwaysCompareMed:         c.RouteSelectionOptions.Config.AlwaysCompareMed,
-			IgnoreAsPathLength:       c.RouteSelectionOptions.Config.IgnoreAsPathLength,
-			ExternalCompareRouterId:  c.RouteSelectionOptions.Config.ExternalCompareRouterId,
-			AdvertiseInactiveRoutes:  c.RouteSelectionOptions.Config.AdvertiseInactiveRoutes,
-			EnableAigp:               c.RouteSelectionOptions.Config.EnableAigp,
-			IgnoreNextHopIgpMetric:   c.RouteSelectionOptions.Config.IgnoreNextHopIgpMetric,
-			DisableBestPathSelection: c.RouteSelectionOptions.Config.DisableBestPathSelection,
-		},
-		DefaultRouteDistance: &api.DefaultRouteDistance{
-			ExternalRouteDistance: uint32(c.DefaultRouteDistance.Config.ExternalRouteDistance),
-			InternalRouteDistance: uint32(c.DefaultRouteDistance.Config.InternalRouteDistance),
-		},
-		Confederation: &api.Confederation{
-			Enabled:      c.Confederation.Config.Enabled,
-			Identifier:   c.Confederation.Config.Identifier,
-			MemberAsList: c.Confederation.Config.MemberAsList,
-		},
-		GracefulRestart: &api.GracefulRestart{
-			Enabled:             c.GracefulRestart.Config.Enabled,
-			RestartTime:         uint32(c.GracefulRestart.Config.RestartTime),
-			StaleRoutesTime:     uint32(c.GracefulRestart.Config.StaleRoutesTime),
-			HelperOnly:          c.GracefulRestart.Config.HelperOnly,
-			DeferralTime:        uint32(c.GracefulRestart.Config.DeferralTime),
-			NotificationEnabled: c.GracefulRestart.Config.NotificationEnabled,
-			LonglivedEnabled:    c.GracefulRestart.Config.LongLivedEnabled,
-		},
-		ApplyPolicy: applyPolicy,
-	}
-}
-
-func newAPIPrefixFromConfigStruct(c Prefix) (*api.Prefix, error) {
-	min, max, err := ParseMaskLength(c.IpPrefix, c.MasklengthRange)
-	if err != nil {
-		return nil, err
-	}
-	return &api.Prefix{
-		IpPrefix:      c.IpPrefix,
-		MaskLengthMin: uint32(min),
-		MaskLengthMax: uint32(max),
-	}, nil
-}
-
-func NewAPIDefinedSetsFromConfigStruct(t *DefinedSets) ([]*api.DefinedSet, error) {
-	definedSets := make([]*api.DefinedSet, 0)
-
-	for _, ps := range t.PrefixSets {
-		prefixes := make([]*api.Prefix, 0)
-		for _, p := range ps.PrefixList {
-			ap, err := newAPIPrefixFromConfigStruct(p)
-			if err != nil {
-				return nil, err
-			}
-			prefixes = append(prefixes, ap)
-		}
-		definedSets = append(definedSets, &api.DefinedSet{
-			DefinedType: api.DefinedType_PREFIX,
-			Name:        ps.PrefixSetName,
-			Prefixes:    prefixes,
-		})
-	}
-
-	for _, ns := range t.NeighborSets {
-		definedSets = append(definedSets, &api.DefinedSet{
-			DefinedType: api.DefinedType_NEIGHBOR,
-			Name:        ns.NeighborSetName,
-			List:        ns.NeighborInfoList,
-		})
-	}
-
-	bs := t.BgpDefinedSets
-	for _, cs := range bs.CommunitySets {
-		definedSets = append(definedSets, &api.DefinedSet{
-			DefinedType: api.DefinedType_COMMUNITY,
-			Name:        cs.CommunitySetName,
-			List:        cs.CommunityList,
-		})
-	}
-
-	for _, es := range bs.ExtCommunitySets {
-		definedSets = append(definedSets, &api.DefinedSet{
-			DefinedType: api.DefinedType_EXT_COMMUNITY,
-			Name:        es.ExtCommunitySetName,
-			List:        es.ExtCommunityList,
-		})
-	}
-
-	for _, ls := range bs.LargeCommunitySets {
-		definedSets = append(definedSets, &api.DefinedSet{
-			DefinedType: api.DefinedType_LARGE_COMMUNITY,
-			Name:        ls.LargeCommunitySetName,
-			List:        ls.LargeCommunityList,
-		})
-	}
-
-	for _, as := range bs.AsPathSets {
-		definedSets = append(definedSets, &api.DefinedSet{
-			DefinedType: api.DefinedType_AS_PATH,
-			Name:        as.AsPathSetName,
-			List:        as.AsPathList,
-		})
-	}
-
-	return definedSets, nil
 }
